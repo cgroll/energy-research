@@ -1,6 +1,6 @@
 version: 1
 project:
-  title: My Research Project
+  title: Energy Research
   authors:
     - name: Your Name
   copyright: '2026'
@@ -9,7 +9,7 @@ project:
     - Thumbs.db
     - .DS_Store
     - '**.ipynb_checkpoints'
-  github: your-username/your-repo-name
+  github: cgroll/energy-research
   toc:
     - file: markdown/index.md
     - title: Analysis
