@@ -3,6 +3,23 @@
 This document describes the project structure and conventions.
 It is written for human contributors and AI agents alike.
 
+## Role of this repo
+
+This is the exploratory-research member of the `energy-platform` family (see
+`../AGENTS.md` one level up for the platform-wide picture). Unlike
+`energy-data-hub` (shared ingestion, Dagster) and `energy-insights`
+(published pages, Dagster), this repo is where a new data source or analysis
+idea is tried out first, using this template's lighter DVC/jupytext pipeline.
+A topic only gets promoted into the hub (as a Dagster asset) and into
+`energy-insights` (as a page) once it's been validated here.
+
+A research topic may read data the hub has already ingested instead of
+re-downloading it — use `hub_file()` from `erx/paths.py`, which resolves an
+absolute path into the sibling `energy-data-hub` checkout and raises loudly
+if that data isn't materialized yet. Data specific to the topic at hand still
+goes through the normal `data/downloads/` / `data/processed/` DVC flow
+described below.
+
 ## Project Tracking
 
 Current state, roadmap, and lessons learned are tracked in

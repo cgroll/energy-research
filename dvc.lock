@@ -5,7 +5,7 @@ stages:
     deps:
     - path: pipeline/01_download_example.py
       hash: md5
-      md5: abb98cefce9854c95a7d5c43e5c58dec
+      md5: 96260e484d532c7ae97659c83881ee1b
       size: 1009
     outs:
     - path: data/downloads/example_data.parquet
@@ -25,13 +25,13 @@ stages:
       size: 165268
     - path: pipeline/02_analyse_example.py
       hash: md5
-      md5: 8b071b168966d61106405966c237287f
+      md5: 0f349b91b40b457891c2ee18415883d0
       size: 2006
     outs:
     - path: book/notebooks/02_analyse_example.ipynb
       hash: md5
-      md5: 306e98a7ef1881f3cc366051df505b7f
-      size: 4819
+      md5: f30daf34b908417de445ad39fbcf058e
+      size: 4821
     - path: output/images/02_category_dist.png
       hash: md5
       md5: 386d9a8a19f9aa84d3c71cae5149c25b

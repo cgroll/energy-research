@@ -1,7 +1,7 @@
 [project]
 name = "energy-research"
 version = "0.1.0"
-description = "Research project"
+description = "Exploratory research playground for the energy-platform stack"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

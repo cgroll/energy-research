@@ -3,20 +3,40 @@
 All paths are resolved relative to the project root, making scripts runnable
 from any working directory. Add a @property for each new data file introduced
 in the pipeline.
+
+Research topics in this repo may also read data that energy-data-hub already
+provides (SMARD, MaStR, PECD, ...) instead of re-downloading it — see
+`hub_file()` below. Same convention as `energy-insights/insights/paths.py`:
+an absolute path into the sibling hub checkout, fail loudly if it's missing
+rather than silently continuing without the data.
 """
 
 from pathlib import Path
+
+HUB_DATA = Path.home() / "research" / "energy-platform" / "energy-data-hub" / "data"
+
+
+def hub_file(*parts: str) -> Path:
+    """Path to a hub data file, e.g. `hub_file("pecd", "de_capacity_factors.parquet")`."""
+    path = HUB_DATA.joinpath(*parts)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{path} not found -- is energy-data-hub cloned at "
+            f"~/research/energy-platform/energy-data-hub, with its "
+            f"`{'/'.join(parts[:-1]) or '.'}` asset(s) materialized?"
+        )
+    return path
 
 
 class ProjPaths:
     """Centralized project paths.
 
-    The root is inferred from the location of this file (pkg/), so scripts
+    The root is inferred from the location of this file (erx/), so scripts
     run correctly regardless of the working directory they are invoked from.
     """
 
     def __init__(self):
-        self._pkg_path = Path(__file__).resolve().parent  # pkg/
+        self._pkg_path = Path(__file__).resolve().parent  # erx/
         self._project_path = self._pkg_path.parent        # project root
 
     # ------------------------------------------------------------------ #
@@ -30,7 +50,7 @@ class ProjPaths:
 
     @property
     def pkg_path(self) -> Path:
-        """Source package directory (pkg/)."""
+        """Source package directory (erx/)."""
         return self._pkg_path
 
     @property

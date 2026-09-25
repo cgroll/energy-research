@@ -2,7 +2,7 @@ version: 1
 project:
   title: Energy Research
   authors:
-    - name: Your Name
+    - name: cgroll
   copyright: '2026'
   exclude:
     - _build
