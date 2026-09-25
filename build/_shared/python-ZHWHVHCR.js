@@ -1,0 +1,1 @@
+import{a}from"/energy-research/build/_shared/chunk-3YW3GWZP.js";import"/energy-research/build/_shared/chunk-RAQ24GF6.js";export default a();
