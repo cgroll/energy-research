@@ -1,4 +1,39 @@
 stages:
+  download_kelmarsh:
+    cmd: uv run python pipeline/01_download_kelmarsh.py
+    deps:
+      - pipeline/01_download_kelmarsh.py
+    outs:
+      - data/downloads/kelmarsh_wt_static.csv:
+          persist: true
+      - data/downloads/kelmarsh_grid_3088.zip:
+          persist: true
+      - data/downloads/kelmarsh_grid_meter_data.csv:
+          persist: true
+      - data/downloads/kelmarsh_grid_meter_status.csv:
+          persist: true
+
+  compare_kelmarsh_pecd:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/02_compare_kelmarsh_pecd.ipynb
+      pipeline/02_compare_kelmarsh_pecd.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/02_compare_kelmarsh_pecd.ipynb
+    deps:
+      - pipeline/02_compare_kelmarsh_pecd.py
+      - data/downloads/kelmarsh_grid_meter_data.csv
+      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
+      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
+    outs:
+      - book/notebooks/02_compare_kelmarsh_pecd.ipynb:
+          cache: false
+      - output/images/02_kelmarsh_vs_pecd_mw_daily.png:
+          cache: false
+      - output/images/02_kelmarsh_vs_pecd_mw_scatter.png:
+          cache: false
+
   download_example:
     cmd: uv run python pipeline/01_download_example.py
     deps:

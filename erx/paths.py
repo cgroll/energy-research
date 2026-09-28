@@ -111,6 +111,39 @@ class ProjPaths:
         return self.processed_data_path / "example_processed.parquet"
 
     # ------------------------------------------------------------------ #
+    # Kelmarsh wind farm data (Zenodo record 5841834)                      #
+    # https://zenodo.org/records/5841834 -- CC-BY-4.0, Cubico Sustainable  #
+    # Investments Ltd. Used to validate PECD onshore wind capacity        #
+    # factors (hub zone UK03) against real metered grid-point generation. #
+    # ------------------------------------------------------------------ #
+
+    @property
+    def kelmarsh_wt_static_file(self) -> Path:
+        """Turbine static data: coordinates, rated power, hub height, rotor
+        diameter for the 6 Senvion MM92 units (`Kelmarsh_WT_static.csv`)."""
+        return self.downloads_path / "kelmarsh_wt_static.csv"
+
+    @property
+    def kelmarsh_grid_zip(self) -> Path:
+        """Raw download: `Kelmarsh_Grid_3088.zip`, the site fiscal/grid
+        meter export (10-minute, 2016-2021)."""
+        return self.downloads_path / "kelmarsh_grid_3088.zip"
+
+    @property
+    def kelmarsh_grid_meter_file(self) -> Path:
+        """Extracted grid meter data: 10-minute `Grid Meter Energy Export
+        (kWh)` at the site's grid connection point, UTC, 2016-01-01 to
+        2021-07-01 (from inside `kelmarsh_grid_zip`)."""
+        return self.downloads_path / "kelmarsh_grid_meter_data.csv"
+
+    @property
+    def kelmarsh_grid_status_file(self) -> Path:
+        """Extracted grid meter device status log (from inside
+        `kelmarsh_grid_zip`) -- availability/status flags, not generation
+        values."""
+        return self.downloads_path / "kelmarsh_grid_meter_status.csv"
+
+    # ------------------------------------------------------------------ #
     # Helpers                                                              #
     # ------------------------------------------------------------------ #
 

@@ -40,3 +40,65 @@ stages:
       hash: md5
       md5: 8e7046ced1ffd391bdfced90bf04fd34
       size: 179776
+  download_kelmarsh:
+    cmd: uv run python pipeline/01_download_kelmarsh.py
+    deps:
+    - path: pipeline/01_download_kelmarsh.py
+      hash: md5
+      md5: 59e420897499604b752cb848340a92cc
+      size: 2865
+    outs:
+    - path: data/downloads/kelmarsh_grid_3088.zip
+      hash: md5
+      md5: 6d8f04ad9d25f9b665ebf42efac7ec4b
+      size: 1518627
+    - path: data/downloads/kelmarsh_grid_meter_data.csv
+      hash: md5
+      md5: 5150cb4ba62d60d77b55c0eaf93abfdc
+      size: 25322406
+    - path: data/downloads/kelmarsh_grid_meter_status.csv
+      hash: md5
+      md5: 8a0dc40efea701a37f74543c84819288
+      size: 467
+    - path: data/downloads/kelmarsh_wt_static.csv
+      hash: md5
+      md5: af3a038f0f7fddfc1608ad0bfc8cf5ba
+      size: 807
+  compare_kelmarsh_pecd:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/02_compare_kelmarsh_pecd.ipynb 
+      pipeline/02_compare_kelmarsh_pecd.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/02_compare_kelmarsh_pecd.ipynb
+    deps:
+    - path: 
+        ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
+      hash: md5
+      md5: 531f51a75a32ef73a78f6ad2d1264189
+      size: 25711499
+    - path: 
+        ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
+      hash: md5
+      md5: a892560354d264daa65a57c49ddec382
+      size: 17184408
+    - path: data/downloads/kelmarsh_grid_meter_data.csv
+      hash: md5
+      md5: 5150cb4ba62d60d77b55c0eaf93abfdc
+      size: 25322406
+    - path: pipeline/02_compare_kelmarsh_pecd.py
+      hash: md5
+      md5: a8826c6b3d2136b18bc75b51d8fe3628
+      size: 6747
+    outs:
+    - path: book/notebooks/02_compare_kelmarsh_pecd.ipynb
+      hash: md5
+      md5: cb061e141ea5ce316f085a049f7399d5
+      size: 13793
+    - path: output/images/02_kelmarsh_vs_pecd_mw_daily.png
+      hash: md5
+      md5: 1205db24f1e4d02bfd9eb88a060eab82
+      size: 314403
+    - path: output/images/02_kelmarsh_vs_pecd_mw_scatter.png
+      hash: md5
+      md5: ccf9f9fc35db79a14496a839a3f1bdac
+      size: 72496
