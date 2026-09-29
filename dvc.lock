@@ -102,3 +102,57 @@ stages:
       hash: md5
       md5: ccf9f9fc35db79a14496a839a3f1bdac
       size: 72496
+  download_kelmarsh_scada:
+    cmd: uv run python pipeline/03_download_kelmarsh_scada.py
+    deps:
+    - path: pipeline/03_download_kelmarsh_scada.py
+      hash: md5
+      md5: 88c1f6967873b2a0241ae63e15a207b6
+      size: 3300
+    outs:
+    - path: data/downloads/kelmarsh_turbine_windspeed_power.parquet
+      hash: md5
+      md5: 06bec5b48ee5c98db014dd9786b33416
+      size: 47334908
+  compare_windspeed_reconstruction:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/04_compare_windspeed_reconstruction.ipynb 
+      pipeline/04_compare_windspeed_reconstruction.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/04_compare_windspeed_reconstruction.ipynb
+    deps:
+    - path: 
+        ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
+      hash: md5
+      md5: 531f51a75a32ef73a78f6ad2d1264189
+      size: 25711499
+    - path: 
+        ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
+      hash: md5
+      md5: a892560354d264daa65a57c49ddec382
+      size: 17184408
+    - path: data/downloads/kelmarsh_grid_meter_data.csv
+      hash: md5
+      md5: 5150cb4ba62d60d77b55c0eaf93abfdc
+      size: 25322406
+    - path: data/downloads/kelmarsh_turbine_windspeed_power.parquet
+      hash: md5
+      md5: 06bec5b48ee5c98db014dd9786b33416
+      size: 47334908
+    - path: pipeline/04_compare_windspeed_reconstruction.py
+      hash: md5
+      md5: 787708d01579c636fdcbcd3aead26286
+      size: 16631
+    outs:
+    - path: book/notebooks/04_compare_windspeed_reconstruction.ipynb
+      hash: md5
+      md5: ff9bdf96f4ace0afa1077e4de10c0f85
+      size: 29969
+    - path: output/images/04_windspeed_reconstruction_daily.png
+      hash: md5
+      md5: 4321cd8e9901ad5c146c1da4ec1504a9
+      size: 294648
+    - path: output/images/04_windspeed_reconstruction_scatter.png
+      hash: md5
+      md5: e00cebce825c10aef982b8afa6ee0e19
+      size: 597032

@@ -30,17 +30,38 @@ stable platform now that it looks sound:
   (`page_kelmarsh_vs_pecd` asset), rebuilt against the hub's own outputs
   rather than re-reading this repo's copy.
 
-This repo's own `data/downloads/kelmarsh_*` files are now superseded by
-the hub's copy — kept here only as the original prototype/scratch record,
-not read by anything downstream anymore.
+This repo's own `data/downloads/kelmarsh_grid_*` / `kelmarsh_wt_static.csv`
+files are now superseded by the hub's copy — kept here only as the
+original prototype/scratch record, not read by anything downstream
+anymore.
+
+**2026-09-29 — Kelmarsh sub-topic, round 2: does real wind speed beat
+PECD's weather input?** The hourly (not monthly) comparison in
+`02_compare_kelmarsh_pecd.py` stayed visibly noisy even after the
+availability correction (r=0.86 hourly vs. r=0.96 monthly). Hypothesis:
+PECD's single large-area reanalysis grid cell is the limiting factor, not
+its wind-to-power conversion approach. Tested by pulling in the per-
+turbine SCADA data explicitly skipped before (`03_download_kelmarsh_scada.py`,
+all 6 years/turbines, ~1.5 GB of raw zips, kept only wind speed + power +
+availability afterward) and converting each turbine's own real nacelle
+wind speed to power via `windpowerlib`'s real MM92/2050 power curve
+(`04_compare_windspeed_reconstruction.py`). Result, full 2016-2021 window,
+hourly: correlation **0.99** and NMAE **7.7%** (availability-adjusted),
+vs. PECD's 0.86 / 35.8% — see Lessons Learned. Confirms the hypothesis
+clearly. Not yet promoted into the hub/book — `windpowerlib` is a new
+dependency and the SCADA download is a much heavier pull (~1.5 GB vs.
+~1.5 MB for the grid meter), so this stays here pending a decision on
+whether it's worth that cost for the stable platform.
 
 ## Next Steps
 
-1. Optional stretch goal for the promoted Kelmarsh page: break the
-   farm-level comparison down to per-turbine SCADA (not downloaded here —
-   the ~1.5 GB `Kelmarsh_SCADA_*.zip` files were deliberately skipped) to
-   see whether October 2018's apparent outage affected one turbine or the
-   whole farm.
+1. Decide whether the wind-speed-reconstruction result (round 2, above)
+   is worth promoting into `energy-data-hub` + `energy-insights` the same
+   way the PECD comparison was — would mean adding `windpowerlib` as a
+   hub/insights dependency and a much heavier per-turbine SCADA ingestion
+   (~1.5 GB raw) than the grid-meter asset. If promoted: also revisit
+   whether October 2018's apparent outage affected one turbine or the
+   whole farm, now that per-turbine data is already on hand here.
 2. A PV-equivalent of the Kelmarsh check (a single plant with public
    metered generation, PECD solar vs. real MW) hasn't been found/tried
    yet — natural next sub-topic, same pattern as Kelmarsh.
@@ -152,3 +173,94 @@ not read by anything downstream anymore.
   `energy-data-hub`'s `kelmarsh` asset group and `energy-insights`'
   `page_kelmarsh_vs_pecd`, both rebuilt against hub-native data rather
   than reusing this repo's downloaded copies.
+
+### 2026-09-29 — Real wind speed + a real power curve beats PECD by a wide margin
+
+- Kelmarsh's per-turbine SCADA data (the ~1.5 GB `Kelmarsh_SCADA_*.zip`
+  files, one per year 2016-2021, one CSV per turbine per year inside)
+  really does include a genuine 10-minute nacelle wind speed per turbine
+  (`Wind speed (m/s)`, plus a `Density adjusted wind speed (m/s)` variant
+  that wasn't populated for at least one turbine/year and wasn't pursued
+  further) — confirmed directly, not just inferred from the signal-mapping
+  doc. `03_download_kelmarsh_scada.py` pulls all 6 years/turbines,
+  discards the raw zips/full ~250-column CSVs after parsing, and keeps
+  only `Wind speed (m/s)`, `Density adjusted wind speed (m/s)`,
+  `Power (kW)`, `Data Availability` — a deliberately narrow extraction,
+  not a full production-grade SCADA ingestion.
+- **`windpowerlib` (PyPI) really exists** and its bundled turbine database
+  (`oedb/turbine_data.csv` + `power_curves.csv`) has an exact nameplate
+  match for Kelmarsh's turbines: `MM92/2050`, 2050 kW rated (matches
+  Kelmarsh's static data exactly), a real (not calculated/generic)
+  published power curve, hub heights listed include 68.5 m (one of
+  Kelmarsh's two actual hub heights exactly; the other, 78.5 m, isn't
+  listed but is close to windpowerlib's 80.0 m option) — no need for a
+  generic/estimated power curve.
+- Setup used: each turbine's own 10-minute wind speed -> `windpowerlib`'s
+  `power_output.power_curve()` against the real MM92/2050 curve directly
+  (no `ModelChain`, no hub-height wind extrapolation -- the nacelle
+  anemometer already measures at ~hub height) -> summed across all 6
+  turbines -> resampled to hourly -> same availability adjustment as the
+  PECD comparison (multiply by the hour's fraction of available
+  10-minute intervals). No wake-loss model -- each turbine's own
+  anemometer already implicitly reflects any wake-slowed air it sees.
+- Full 2016-2021 window, hourly resolution, vs. Kelmarsh's real
+  grid-meter MW:
+
+  | method | corr | MAE (MW) | NMAE | bias (MW) |
+  |---|---|---|---|---|
+  | PECD, raw | 0.810 | 1.341 | 40.6% | -0.10 |
+  | PECD, availability-adj. | 0.855 | 1.181 | 35.8% | -0.26 |
+  | wind-speed reconstruction, raw | 0.953 | 0.370 | 11.2% | +0.01 |
+  | wind-speed reconstruction, availability-adj. | **0.989** | **0.253** | **7.7%** | -0.11 |
+
+  Even the *raw* (non-availability-adjusted) wind-speed reconstruction
+  beats *availability-adjusted* PECD by a wide margin on every metric.
+- At every aggregation level (hourly through monthly), the
+  availability-adjusted wind-speed reconstruction's correlation
+  (0.989-0.996) stays far above and far more stable than PECD's
+  (0.855-0.959) — strong evidence that PECD's hourly-scale error is
+  dominated by its *weather input* (one large reanalysis grid cell
+  standing in for one specific farm's exact location), not by its
+  wind-to-power conversion methodology. Not a fully clean isolation of
+  that question, though — PECD's own raw wind-speed field (as opposed to
+  its finished capacity-factor product) was not pulled in for comparison,
+  so "PECD's conversion formula specifically" still isn't tested in
+  isolation, only strongly implicated by elimination.
+- Not yet promoted to the hub/book (see Next Steps) — `windpowerlib` and
+  the much larger per-turbine SCADA pull are a bigger commitment than the
+  grid-meter-only asset already promoted.
+- **Follow-up same day: two more signals were already sitting in the
+  downloaded SCADA data and worth checking.** `Density adjusted wind
+  speed (m/s)` (a Greenbyte-computed, site-corrected variant of plain
+  wind speed) and each turbine's own real metered `Power (kW)` (as
+  opposed to the substation-level grid meter used as ground truth
+  throughout). Both added to `04_compare_windspeed_reconstruction.py`:
+  - **Density-adjusted wind speed initially looked like a big
+    improvement raw** (corr 0.99 vs. plain wind speed's 0.96) — but this
+    turned out to be a data-coverage artifact, not a real one: its ~8%
+    missing rows are concentrated almost exactly in low-availability
+    hours (mean `Data Availability` 0.67 when missing vs. 1.00 when
+    present), so the hardest hours were silently excluded from that
+    "raw" number rather than well predicted. Once compared fairly
+    (availability-adjusted both), plain and density-adjusted wind speed
+    land within 0.01 percentage points of NMAE (7.33% vs. 7.33%) — the
+    density correction adds nothing measurable once downtime is handled
+    properly. Worth remembering generally: check *why* two series
+    disagree before crediting either one.
+  - **Summing each turbine's own real metered Power (kW) (no wind speed,
+    no power curve at all) still misses the grid-meter reading by NMAE
+    4.0%**, bias +0.11 MW — ordinary transformer/house-load/cabling loss
+    between individual turbine meters and the actual grid connection
+    point. This sets a real ceiling: the wind-speed reconstruction's
+    7.3% NMAE is roughly half unavoidable physical loss and half genuine
+    power-curve/modeling imprecision, useful context for judging how
+    much further any better conversion model could plausibly close the
+    remaining gap.
+  - Also fixed a real bug caught while adding these: the original
+    wind-speed-to-MW conversion silently summed turbines with
+    `skipna=True` (a missing turbine's reading just drops out of the sum
+    rather than invalidating it), understating the farm total whenever
+    any turbine was missing — worse for the ~8%-missing density-adjusted
+    column than the ~3%-missing plain one. Fixed with `min_count=6`
+    (requires all 6 turbines present, else the farm-level result is
+    correctly `NaN`) for every per-turbine sum in this pipeline.

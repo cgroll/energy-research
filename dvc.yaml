@@ -34,6 +34,36 @@ stages:
       - output/images/02_kelmarsh_vs_pecd_mw_scatter.png:
           cache: false
 
+  download_kelmarsh_scada:
+    cmd: uv run python pipeline/03_download_kelmarsh_scada.py
+    deps:
+      - pipeline/03_download_kelmarsh_scada.py
+    outs:
+      - data/downloads/kelmarsh_turbine_windspeed_power.parquet:
+          persist: true
+
+  compare_windspeed_reconstruction:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/04_compare_windspeed_reconstruction.ipynb
+      pipeline/04_compare_windspeed_reconstruction.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/04_compare_windspeed_reconstruction.ipynb
+    deps:
+      - pipeline/04_compare_windspeed_reconstruction.py
+      - data/downloads/kelmarsh_turbine_windspeed_power.parquet
+      - data/downloads/kelmarsh_grid_meter_data.csv
+      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
+      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
+    outs:
+      - book/notebooks/04_compare_windspeed_reconstruction.ipynb:
+          cache: false
+      - output/images/04_windspeed_reconstruction_daily.png:
+          cache: false
+      - output/images/04_windspeed_reconstruction_scatter.png:
+          cache: false
+
   download_example:
     cmd: uv run python pipeline/01_download_example.py
     deps:

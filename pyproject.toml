@@ -17,6 +17,7 @@ dependencies = [
     "numpy>=1.26.0",
     "pandas>=2.2.0",
     "pyarrow>=17.0.0",
+    "windpowerlib>=0.2.2",
 ]
 
 [build-system]
