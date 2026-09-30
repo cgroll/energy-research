@@ -15,6 +15,14 @@ project:
     - title: Analysis
       children:
         - file: notebooks/02_analyse_example.ipynb
+    - title: Kelmarsh (UK) wind validation
+      children:
+        - file: notebooks/02_compare_kelmarsh_pecd.ipynb
+        - file: notebooks/04_compare_windspeed_reconstruction.ipynb
+    - title: PECD capacity factors
+      children:
+        - file: notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
+        - file: notebooks/06_pecd_country_and_regional_capacity_factors.ipynb
 site:
   options:
     folders: true
