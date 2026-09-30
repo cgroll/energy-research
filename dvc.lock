@@ -13,10 +13,10 @@ stages:
       md5: 018f2298ceca482c45be800de9bb0c10
       size: 165268
   process_example:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output book/notebooks/02_analyse_example.ipynb
-      pipeline/02_analyse_example.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/02_analyse_example.ipynb 
+      pipeline/02_analyse_example.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/02_analyse_example.ipynb
     deps:
     - path: data/downloads/example_data.parquet
@@ -65,18 +65,18 @@ stages:
       md5: af3a038f0f7fddfc1608ad0bfc8cf5ba
       size: 807
   compare_kelmarsh_pecd:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output book/notebooks/02_compare_kelmarsh_pecd.ipynb
-      pipeline/02_compare_kelmarsh_pecd.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/02_compare_kelmarsh_pecd.ipynb 
+      pipeline/02_compare_kelmarsh_pecd.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/02_compare_kelmarsh_pecd.ipynb
     deps:
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
       hash: md5
       md5: 531f51a75a32ef73a78f6ad2d1264189
       size: 25711499
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
       hash: md5
       md5: a892560354d264daa65a57c49ddec382
@@ -115,18 +115,18 @@ stages:
       md5: 06bec5b48ee5c98db014dd9786b33416
       size: 47334908
   compare_windspeed_reconstruction:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output book/notebooks/04_compare_windspeed_reconstruction.ipynb
-      pipeline/04_compare_windspeed_reconstruction.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/04_compare_windspeed_reconstruction.ipynb 
+      pipeline/04_compare_windspeed_reconstruction.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/04_compare_windspeed_reconstruction.ipynb
     deps:
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
       hash: md5
       md5: 531f51a75a32ef73a78f6ad2d1264189
       size: 25711499
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
       hash: md5
       md5: a892560354d264daa65a57c49ddec382
@@ -157,18 +157,18 @@ stages:
       md5: e00cebce825c10aef982b8afa6ee0e19
       size: 597032
   pecd_de_capacity_factors_vs_constant_demand:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output
-      book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
-      pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py && uv run
-      python pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output 
+      book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb 
+      pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py && uv run 
+      python pipeline/_strip_jupytext_metadata.py 
       book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
     deps:
     - path: ../energy-data-hub/data/capacity/capacity_by_region_year.parquet
       hash: md5
       md5: 737cf65035c1fa7bd0b5a32a21f0cc76
       size: 285259
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/pecd_country_capacity_factors_simple_de.parquet
       hash: md5
       md5: f5d731436bc741f48555859568751446
@@ -222,3 +222,66 @@ stages:
       hash: md5
       md5: b9259eba1cdb6ad43e5b3eb2fffa2ed3
       size: 95812
+  pecd_country_and_regional_capacity_factors:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output 
+      book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb 
+      pipeline/06_pecd_country_and_regional_capacity_factors.py && uv run python
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb
+    deps:
+    - path: 
+        ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_1980-1989.parquet
+      hash: md5
+      md5: 3f5db9defc8c0882f0343bc7093055c4
+      size: 25715788
+    - path: 
+        ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_1990-1999.parquet
+      hash: md5
+      md5: 8448f80b7052aa877f8bd42c91053093
+      size: 25683563
+    - path: 
+        ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2000-2009.parquet
+      hash: md5
+      md5: d321b4669776b6dcdfb3f146079fb5d9
+      size: 25664694
+    - path: 
+        ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
+      hash: md5
+      md5: 531f51a75a32ef73a78f6ad2d1264189
+      size: 25711499
+    - path: 
+        ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
+      hash: md5
+      md5: a892560354d264daa65a57c49ddec382
+      size: 17184408
+    - path: 
+        ../energy-data-hub/data/pecd/pecd_country_capacity_factors_simple.parquet
+      hash: md5
+      md5: 4bb03bc019d3aab460aa72f70bbc2564
+      size: 231834165
+    - path: ../energy-data-hub/data/pecd/pecd_solar_capacity_factors.parquet
+      hash: md5
+      md5: f1ac7e3e0f6162d5e04aac0f3a84e1f9
+      size: 51558551
+    - path: pipeline/06_pecd_country_and_regional_capacity_factors.py
+      hash: md5
+      md5: 5ce7d586af63ad734e31f13d568584c9
+      size: 16251
+    outs:
+    - path: book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb
+      hash: md5
+      md5: 33b23913c865ab2935370857c3dd2b80
+      size: 25773
+    - path: output/images/06_country_mean_cf_bars.png
+      hash: md5
+      md5: c88075ecc3dc6ad509745dcb4c445db4
+      size: 118585
+    - path: output/images/06_de_solar_nuts2_bar.png
+      hash: md5
+      md5: 66d3f8ef2bfe931d6ae62a35143763ec
+      size: 126687
+    - path: output/images/06_wind_onshore_zone_spread.png
+      hash: md5
+      md5: d16ebc52a0eded0bf88706d7bfaea521
+      size: 115467

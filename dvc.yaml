@@ -99,6 +99,33 @@ stages:
       - output/images/05_residual_duration_curve.png:
           cache: false
 
+  pecd_country_and_regional_capacity_factors:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb
+      pipeline/06_pecd_country_and_regional_capacity_factors.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb
+    deps:
+      - pipeline/06_pecd_country_and_regional_capacity_factors.py
+      - ../energy-data-hub/data/pecd/pecd_country_capacity_factors_simple.parquet
+      - ../energy-data-hub/data/pecd/pecd_solar_capacity_factors.parquet
+      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_1980-1989.parquet
+      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_1990-1999.parquet
+      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2000-2009.parquet
+      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
+      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
+    outs:
+      - book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb:
+          cache: false
+      - output/images/06_country_mean_cf_bars.png:
+          cache: false
+      - output/images/06_wind_onshore_zone_spread.png:
+          cache: false
+      - output/images/06_de_solar_nuts2_bar.png:
+          cache: false
+
   download_example:
     cmd: uv run python pipeline/01_download_example.py
     deps:

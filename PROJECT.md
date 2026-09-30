@@ -121,6 +121,46 @@ SMARD series throughout. Nine chart PNGs total now (`05_*.png`).
   — even more pronounced here (thousands of demand-days vs. single digits
   from 2x on) since the record is 46 years instead of 7.
 
+**2026-09-30 — New sub-topic: country-level vs. within-country capacity
+factor spread.** Checked the intuitive hypothesis "solar in Italy beats
+solar in Denmark on average" directly against the hub's
+`pecd_country_capacity_factors_simple` (confirmed: 14.4% vs. 10.5%, Italy
+37% higher, 1980-2025), then asked what's underneath a single
+country-level number. Built here as
+`pipeline/06_pecd_country_and_regional_capacity_factors.py`
+(`book/notebooks/06_...ipynb`).
+- **Resolution check first, before computing anything:** true Eurostat
+  NUTS2 exists in this hub only for Germany's solar
+  (`pecd_solar_capacity_factors`, 38 regions) — no other country was ever
+  requested at that granularity for solar, and PECD's wind product has no
+  NUTS2/country-level option at all (confirmed against the live CDS API,
+  see `energy-data-hub/docs/pecd_data_availability.md`), only its own
+  coarser zone partition (`peon`/`peof`, already downloaded full-Europe).
+  So a genuine NUTS2, all-of-Europe, both-technology comparison isn't
+  possible with what's on disk today.
+- **Real finding, not just a caveat:** solar's cross-country spread
+  (~9-12 pts, Finland to Cyprus/Egypt depending on domain) dwarfs
+  Germany's own internal NUTS2 spread (2.0 pts, Hamburg to Freiburg) — a
+  single country-level solar number is a safe summary. Wind onshore is
+  the opposite: several countries' own PECD zones (Spain, France, and
+  outside the EU, Turkey at 31 pts across 13 zones) span a wider range
+  internally than separates many country-mean *pairs* — a single national
+  wind capacity factor hides much more than the equivalent solar number.
+- Also surfaced a specific, correctable gap while writing this up: the
+  hub's DE-only solar NUTS2 pull (`process_solar_capacity_factors`)
+  requests `spatial_resolution=nuts_2` for the *full* PECD domain (no
+  country filter in the CDS request itself), then keeps only Germany's
+  columns and deletes the raw zip — every other country's NUTS2 columns
+  already passed through this pipeline once and were discarded, not
+  something PECD refuses to provide. Extending to NUTS2-everywhere would
+  mean re-running that same request without the DE filter, not a new kind
+  of download.
+- Deliberately overlaps `energy-insights`' `08_pecd_country_comparison`
+  (country-level bars/choropleths, same hub asset) only far enough to
+  anchor the Italy/Denmark check in the full European context; everything
+  from the resolution question onward is new content that page doesn't
+  cover.
+
 ## Next Steps
 
 1. Decide whether the wind-speed-reconstruction result (round 2, above)
