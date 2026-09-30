@@ -38,6 +38,10 @@
 # own weights are exactly the market they were derived from.
 
 # %%
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import cartopy.io.shapereader as shpreader
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -147,6 +151,91 @@ plt.show()
 # Long-run mean capacity factor by country, all PECD countries with
 # non-null data, sorted ascending. Italy and Denmark highlighted in the
 # solar panel. Same underlying data and result as `08`'s equivalent chart.
+# ```
+
+# %% [markdown]
+# ### The same numbers, on a map
+#
+# A sorted bar chart is the more honest way to *compare* countries (exact
+# ranking, exact values), but it throws away geography -- a map makes the
+# north-south solar gradient and the Atlantic/North Sea wind pattern
+# visible at a glance instead. Country geometries from Natural Earth
+# (`cartopy`'s bundled `admin_0_countries`, 10m resolution); same
+# `NUTS_TO_ADM0` code crosswalk and map-drawing approach as `08`'s
+# choropleths.
+
+# %%
+NUTS_TO_ADM0 = {
+    "AL": "ALB", "AT": "AUT", "BA": "BIH", "BE": "BEL", "BG": "BGR",
+    "CH": "CHE", "CY": "CYP", "CZ": "CZE", "DE": "DEU", "DK": "DNK",
+    "DZ": "DZA", "EE": "EST", "EG": "EGY", "EH": "SAH", "EL": "GRC",
+    "ES": "ESP", "FI": "FIN", "FR": "FRA", "HR": "HRV", "HU": "HUN",
+    "IE": "IRL", "IL": "ISR", "IS": "ISL", "IT": "ITA", "JO": "JOR",
+    "LB": "LBN", "LI": "LIE", "LT": "LTU", "LU": "LUX", "LV": "LVA",
+    "LY": "LBY", "MA": "MAR", "MD": "MDA", "ME": "MNE", "MK": "MKD",
+    "MT": "MLT", "NL": "NLD", "NO": "NOR", "PL": "POL", "PS": "PSX",
+    "PT": "PRT", "RO": "ROU", "RS": "SRB", "SE": "SWE", "SI": "SVN",
+    "SK": "SVK", "SY": "SYR", "TN": "TUN", "TR": "TUR", "UA": "UKR",
+    "UK": "GBR", "XK": "KOS",
+}
+
+_shpfile = shpreader.natural_earth(resolution="10m", category="cultural", name="admin_0_countries")
+_country_geoms = {r.attributes["ADM0_A3"]: r.geometry for r in shpreader.Reader(_shpfile).records()}
+
+PROJ = ccrs.LambertConformal(central_longitude=10, central_latitude=50)
+EUROPE_EXTENT = [-25, 47, 27, 72]
+
+
+def _map_base(ax) -> None:
+    ax.set_extent(EUROPE_EXTENT, crs=ccrs.PlateCarree())
+    ax.add_feature(cfeature.OCEAN, facecolor="#c6def1", zorder=0)
+    ax.add_feature(cfeature.LAND, facecolor="#e0e0e0", zorder=0)
+    ax.add_feature(cfeature.COASTLINE, linewidth=0.4, zorder=2)
+    ax.add_feature(cfeature.BORDERS, linewidth=0.25, linestyle=":", zorder=2)
+
+
+def _country_choropleth(ax, values: pd.Series, cmap_name: str, title: str, callouts: tuple[str, ...] = ()) -> None:
+    cmap = plt.colormaps[cmap_name]
+    norm = mcolors.Normalize(vmin=values.min(), vmax=values.max())
+    _map_base(ax)
+
+    for code, val in values.items():
+        geom = _country_geoms.get(NUTS_TO_ADM0.get(code))
+        if geom is None:
+            continue
+        edge_color, edge_width = ("black", 1.3) if code in callouts else ("black", 0.25)
+        ax.add_geometries([geom], ccrs.PlateCarree(), facecolor=cmap(norm(val)), edgecolor=edge_color, linewidth=edge_width, zorder=1)
+        if code in callouts:
+            centroid = geom.centroid
+            ax.annotate(
+                f"{code}\n{val:.1%}", (centroid.x, centroid.y), transform=ccrs.PlateCarree(),
+                fontsize=8, fontweight="bold", ha="center", va="center", zorder=4,
+                bbox=dict(facecolor="white", edgecolor="none", alpha=0.75, pad=1.5),
+            )
+
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([])
+    plt.colorbar(sm, ax=ax, orientation="vertical", fraction=0.045, pad=0.04, label="Mean capacity factor")
+    ax.set_title(title, fontsize=10, pad=6)
+
+
+fig, axes = plt.subplots(1, 3, subplot_kw={"projection": PROJ}, figsize=(18, 8))
+_country_choropleth(axes[0], mean_solar, "YlOrRd", f"Solar PV\n(PECD {YEAR_RANGE})", callouts=("IT", "DK"))
+_country_choropleth(axes[1], mean_onshore, "Blues", f"Wind onshore\n(PECD {YEAR_RANGE})")
+_country_choropleth(axes[2], mean_offshore, "GnBu", f"Wind offshore, country mean\n(PECD {YEAR_RANGE})")
+fig.suptitle("PECD — long-run mean capacity factors by country", fontsize=12)
+fig.tight_layout()
+fig.savefig(paths.images_path / "06_country_mean_cf_map.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/06_country_mean_cf_map.png
+# :name: fig-06-country-mean-cf-map
+# Same data as {numref}`fig-06-country-mean-cf-bars`, drawn as a choropleth.
+# Italy and Denmark called out on the solar map. Offshore is still the
+# country-level mean here (matching the bar chart) -- see `08`'s dedicated
+# per-`p2of`-zone map for the within-country-waters breakdown offshore
+# resource quality actually has.
 # ```
 
 # %%

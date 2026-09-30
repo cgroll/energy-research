@@ -266,17 +266,21 @@ stages:
       size: 51558551
     - path: pipeline/06_pecd_country_and_regional_capacity_factors.py
       hash: md5
-      md5: 5ce7d586af63ad734e31f13d568584c9
-      size: 16251
+      md5: da3f8331142dc6058f0edf8d1a17263b
+      size: 20525
     outs:
     - path: book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb
       hash: md5
-      md5: 33b23913c865ab2935370857c3dd2b80
-      size: 25773
+      md5: 712130b7f774fd0968df386547391c32
+      size: 31812
     - path: output/images/06_country_mean_cf_bars.png
       hash: md5
       md5: c88075ecc3dc6ad509745dcb4c445db4
       size: 118585
+    - path: output/images/06_country_mean_cf_map.png
+      hash: md5
+      md5: 3bc00f1ee3416ff342cd8dfee5a95385
+      size: 449601
     - path: output/images/06_de_solar_nuts2_bar.png
       hash: md5
       md5: 66d3f8ef2bfe931d6ae62a35143763ec

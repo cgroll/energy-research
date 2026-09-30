@@ -121,6 +121,8 @@ stages:
           cache: false
       - output/images/06_country_mean_cf_bars.png:
           cache: false
+      - output/images/06_country_mean_cf_map.png:
+          cache: false
       - output/images/06_wind_onshore_zone_spread.png:
           cache: false
       - output/images/06_de_solar_nuts2_bar.png:
