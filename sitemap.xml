@@ -7,4 +7,16 @@
   <url>
     <loc>http://localhost:3000/notebooks/analyse-example</loc>
   </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/compare-kelmarsh-pecd</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/compare-windspeed-reconstruction</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/pecd-de-capacity-factors-vs-constant-demand</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/pecd-country-and-regional-capacity-factors</loc>
+  </url>
 </urlset>
