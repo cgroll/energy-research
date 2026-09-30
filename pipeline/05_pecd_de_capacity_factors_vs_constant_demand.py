@@ -581,6 +581,73 @@ plt.show()
 # ```
 
 # %% [markdown]
+# ### Average residual load, buildout x battery duration
+#
+# The chart above only samples four battery sizes (`No battery`, `4h`,
+# `24h`, `168h`) against the full `MULTIPLIERS` list. Zooming into the
+# range where most near-term buildout/battery decisions would actually
+# land -- buildout up to 5x today's fleet, battery duration up to 4h --
+# and filling in a finer grid on both axes shows how average residual load
+# moves as a smooth surface rather than at four scattered points.
+
+# %%
+HEATMAP_MULTIPLIERS = np.arange(1.0, 5.01, 0.5)
+HEATMAP_BATTERY_HOURS = np.arange(0.0, 4.01, 1.0)
+
+residual_heatmap_gw = np.array([
+    [simulate(multiplier, duration_h)["residual"].mean() / 1000 for multiplier in HEATMAP_MULTIPLIERS]
+    for duration_h in HEATMAP_BATTERY_HOURS
+])
+
+fig, ax = plt.subplots(figsize=(10, 5.5))
+# "RdYlGn_r" (reversed): high residual load (bad, more backup needed) ->
+# red; low residual load (good) -> green. Note this is a 3-hue "traffic
+# light" map, not a single-hue sequential ramp -- a deliberate deviation
+# from the house style's usual single-hue magnitude encoding, requested
+# specifically for this chart's intuitive good/bad reading. Not colorblind
+# -safe the way a single-hue ramp is; the cell-value labels below carry the
+# actual reading regardless of color perception.
+im = ax.imshow(residual_heatmap_gw, origin="lower", cmap="RdYlGn_r", aspect="auto")
+
+ax.set_xticks(np.arange(len(HEATMAP_MULTIPLIERS)))
+ax.set_xticklabels([f"{m:g}x" for m in HEATMAP_MULTIPLIERS])
+ax.set_yticks(np.arange(len(HEATMAP_BATTERY_HOURS)))
+ax.set_yticklabels([f"{h:g}h" for h in HEATMAP_BATTERY_HOURS])
+ax.set_xlabel("RE buildout multiplier (x today's fleet)")
+ax.set_ylabel("Battery duration")
+ax.set_title("Average residual load [GW] (1980-2025, constant demand)")
+
+# Text color per cell from the actual rendered color's perceptual
+# luminance, not just "value > midpoint" -- RdYlGn_r's green and red ends
+# are both dark enough to need white text, while its yellow middle needs
+# dark text, so a simple high/low split would get the middle wrong.
+for i in range(residual_heatmap_gw.shape[0]):
+    for j in range(residual_heatmap_gw.shape[1]):
+        value = residual_heatmap_gw[i, j]
+        r, g, b, _ = im.cmap(im.norm(value))
+        luminance = 0.299 * r + 0.587 * g + 0.114 * b
+        text_color = "white" if luminance < 0.6 else "#3a2a26"
+        ax.text(j, i, f"{value:.1f}", ha="center", va="center", fontsize=8, color=text_color)
+
+fig.colorbar(im, ax=ax, label="Average residual load [GW]", fraction=0.046, pad=0.04)
+fig.tight_layout()
+fig.savefig(paths.images_path / "05_residual_load_heatmap.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/05_residual_load_heatmap.png
+# :name: fig-05-residual-load-heatmap
+# Average residual load (GW) across a finer buildout x battery-duration
+# grid than the four-scenario chart above, restricted to the 1x-5x /
+# 0h-4h range. Reading down any column: within this narrow 0-4h range, a
+# battery still buys comparatively little -- most of the improvement
+# visible here comes from moving right (more buildout), not down (a
+# bigger, but still short-duration, battery). The bigger batteries (24h,
+# 168h) needed to close the picture further live outside this grid, in the
+# four-scenario chart above.
+# ```
+
+# %% [markdown]
 # ## Does storage's marginal value hold up across the whole buildout range?
 
 # %%

@@ -188,6 +188,20 @@ build:
   demand in nameplate GW, but a 4h battery is still only ~17% of one day's
   demand (246 GWh vs. ~1,475 GWh/day) — context for why the existing sweep
   needs 24h/168h batteries before storage alone meaningfully closes the gap.
+- The notebook's section order was reshuffled into a clearer narrative
+  (demand -> capacity/battery sizes -> capacity factors -> buildout alone
+  -> 2x battery decomposition -> coverage/curtailment -> the remaining
+  sweeps -> peak residual load + duration curve, kept together at the end
+  -> summary -> takeaways) — pure reordering, numbers unchanged.
+- Added a heatmap to the coverage/curtailment chapter: average residual
+  load (GW) over a finer buildout x battery-duration grid than the
+  four-scenario chart it sits next to, restricted to the near-term-relevant
+  range (1x-5x buildout, 0h-4h battery, 0.5x / 1h steps). Confirms
+  numerically that within this short-duration range, buildout dominates —
+  e.g. at 0h battery, going 1x->5x drops residual ~25 GW, while at any
+  fixed multiplier, going 0h->4h battery only shaves off ~1-3 GW — battery
+  duration would need to go well beyond 4h (as the existing 24h/168h
+  scenarios do) before it rivals buildout's effect.
 
 ## Next Steps
 

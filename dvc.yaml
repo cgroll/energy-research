@@ -94,6 +94,8 @@ stages:
           cache: false
       - output/images/05_re_share_and_curtailment.png:
           cache: false
+      - output/images/05_residual_load_heatmap.png:
+          cache: false
       - output/images/05_peak_residual_load.png:
           cache: false
       - output/images/05_worst_drawdown.png:

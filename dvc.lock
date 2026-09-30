@@ -179,13 +179,13 @@ stages:
       size: 1012396
     - path: pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py
       hash: md5
-      md5: 55d04f18cbca3c617c48ae00d41233d5
-      size: 35845
+      md5: 3bf6c3c5cb5c0d3bfd05f2623a395d5b
+      size: 39184
     outs:
     - path: book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
       hash: md5
-      md5: e750a3c5359ce10cd69a84030e244920
-      size: 62196
+      md5: e74847a8f38f1775d26b7741bc9c166f
+      size: 66867
     - path: output/images/05_battery_decomposition_2x.png
       hash: md5
       md5: d4586da5adae6e27563877d6eed841ae
@@ -218,6 +218,10 @@ stages:
       hash: md5
       md5: 0f3c0b73a53cfe7f76dc24b9c2c22655
       size: 87363
+    - path: output/images/05_residual_load_heatmap.png
+      hash: md5
+      md5: 4ee483c938abb2a318cae404c3de0e65
+      size: 81466
     - path: output/images/05_scale_check_bars.png
       hash: md5
       md5: 95c6b9668758a666ab179bfa88c62e55
