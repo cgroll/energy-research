@@ -140,13 +140,171 @@ plt.show()
 # ```
 
 # %% [markdown]
+# ## Today's fleet and battery sizes, in context
+#
+# Before running any buildout/battery sweep, three numbers worth having
+# side by side: today's actual installed RE capacity, how the battery
+# scenarios below are sized, and how all of that compares in scale to the
+# constant demand reference just introduced.
+
+# %% [markdown]
+# ### Today's installed capacity
+#
+# Same source and method as `09`: latest year-end snapshot from
+# `capacity_by_region_year`, offshore identified by region code prefix
+# `DEZZ`.
+
+# %%
+capacity_annual = pd.read_parquet(hub_file("capacity", "capacity_by_region_year.parquet"))
+is_offshore = capacity_annual["region_code"].str.startswith("DEZZ")
+latest_year = capacity_annual["year"].max()
+latest = capacity_annual[capacity_annual["year"] == latest_year]
+
+CURRENT_CAPACITY_MW = {
+    "solar": latest.loc[latest["technology"] == "solar", "capacity_mw"].sum(),
+    "wind_onshore": latest.loc[(latest["technology"] == "wind") & ~is_offshore.reindex(latest.index, fill_value=False), "capacity_mw"].sum(),
+    "wind_offshore": latest.loc[(latest["technology"] == "wind") & is_offshore.reindex(latest.index, fill_value=False), "capacity_mw"].sum(),
+}
+total_current_gw = sum(CURRENT_CAPACITY_MW.values()) / 1000
+
+print(f"Current installed capacity ({latest_year} snapshot):")
+for tech, mw in CURRENT_CAPACITY_MW.items():
+    print(f"  {tech:15s}  {mw / 1000:6.1f} GW")
+print(f"  {'total':15s}  {total_current_gw:6.1f} GW")
+
+
+TECHS = ["solar", "wind_onshore", "wind_offshore"]
+
+
+def re_generation(buildout_multiplier: float) -> np.ndarray:
+    return sum(cf[t].values * CURRENT_CAPACITY_MW[t] * buildout_multiplier for t in TECHS)
+
+
+demand = np.full(len(cf), constant_demand_mw)
+
+# %% [markdown]
+# ### Battery scenarios
+#
+# Same battery model as `09`: unlimited charge/discharge power, sized purely
+# by energy capacity as `N` hours of (now constant) average demand, 90%
+# round-trip efficiency split via `sqrt`.
+
+# %%
+BATTERY_ROUND_TRIP_EFFICIENCY = 0.90
+EFF = np.sqrt(BATTERY_ROUND_TRIP_EFFICIENCY)
+
+BATTERY_SCENARIOS = {"No battery": 0.0, "4h battery": 4.0, "24h battery": 24.0, "168h battery": 168.0}
+
+print("Battery scenarios (unlimited power; energy capacity = N hours of constant demand):")
+for label, duration_h in BATTERY_SCENARIOS.items():
+    cap_gwh = duration_h * avg_demand_mw / 1000
+    print(f"  {label:14s}  {duration_h:5.0f} h of demand   {cap_gwh:9,.0f} GWh  ({cap_gwh / 1000:.2f} TWh)")
+
+# %% [markdown]
+# ### A quick scale check
+#
+# Consumption, battery sizes, and installed capacity all just got
+# introduced separately above -- easy to lose a feel for how big any of
+# these numbers actually are relative to each other. One more bar chart,
+# purely for orders of magnitude, no simulation involved: average
+# consumption (GW, a power quantity) next to a 1h and a 4h battery (GWh, an
+# energy quantity) next to today's total installed RE capacity (GW again).
+# GW and GWh are deliberately placed on the same axis here -- a battery
+# sized at "N hours of average demand" has a GWh capacity that is, by
+# construction, the same number as N times the GW consumption figure, so
+# the bars are directly comparable in scale even though the units differ.
+
+# %%
+SCALE_CHECK_LABELS = ["Avg.\nconsumption\n(GW)", "1h battery\n(GWh)", "4h battery\n(GWh)", "Installed RE\ncapacity (GW)"]
+scale_check_simple_values = [
+    avg_demand_mw / 1000,
+    1.0 * avg_demand_mw / 1000,
+    BATTERY_SCENARIOS["4h battery"] * avg_demand_mw / 1000,
+]
+scale_check_simple_colors = [NEUTRAL, "#cfe3fa", BATTERY_COLORS["4h battery"]]
+
+fig, ax = plt.subplots(figsize=(8, 6))
+x = np.arange(len(SCALE_CHECK_LABELS))
+width = 0.6
+
+bars = ax.bar(x[:3], scale_check_simple_values, width, color=scale_check_simple_colors, edgecolor="white", linewidth=0.5)
+for bar, value in zip(bars, scale_check_simple_values):
+    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 2, f"{value:,.0f}", ha="center", va="bottom", fontsize=10)
+
+install_bottom = 0.0
+for tech, color, tech_label in [("solar", YELLOW, "Solar"), ("wind_onshore", BLUE, "Wind onshore"), ("wind_offshore", AQUA, "Wind offshore")]:
+    value_gw = CURRENT_CAPACITY_MW[tech] / 1000
+    ax.bar(x[3], value_gw, width, bottom=install_bottom, color=color, edgecolor="white", linewidth=0.5, label=tech_label)
+    install_bottom += value_gw
+ax.text(x[3], install_bottom + 2, f"{install_bottom:,.0f}", ha="center", va="bottom", fontsize=10)
+
+ax.set_xticks(x)
+ax.set_xticklabels(SCALE_CHECK_LABELS)
+ax.set_ylabel("GW (power) or GWh (energy) -- see caption")
+ax.set_title("Orders of magnitude: consumption, battery sizes, installed capacity (today)")
+ax.set_ylim(0, install_bottom * 1.2)
+ax.yaxis.grid(True, linewidth=0.4, alpha=0.6)
+ax.set_axisbelow(True)
+ax.legend(fontsize=9, loc="upper left")
+fig.tight_layout()
+fig.savefig(paths.images_path / "05_scale_check_bars.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/05_scale_check_bars.png
+# :name: fig-05-scale-check-bars
+# Average consumption (GW), a 1h and a 4h battery's energy capacity (GWh),
+# and today's total installed RE capacity (GW, stacked by technology).
+# Today's fleet is already ~3x average demand in nameplate GW -- but with
+# solar's ~11% and wind's ~24-43% capacity factors (see the capacity-factor
+# bar chart below), that nameplate figure doesn't translate directly into
+# average output. A 4h battery, at ~246 GWh, is a small fraction of a single
+# day's ~1,475 GWh of demand -- context for why the sweep below needs
+# 24h/168h batteries before storage alone can meaningfully close the gap.
+# ```
+
+# %%
+def simulate(buildout_multiplier: float, duration_h: float) -> dict[str, np.ndarray]:
+    """Hourly (generation, direct, delivered, curtailed, residual) arrays for one scenario."""
+    gen = re_generation(buildout_multiplier)
+    cap_mwh = duration_h * avg_demand_mw
+
+    n = len(gen)
+    soc = 0.0
+    residual = np.empty(n)
+    curtailed = np.empty(n)
+    delivered = np.empty(n)
+    for i in range(n):
+        net = gen[i] - demand[i]
+        if net > 0:
+            can_take = min(net, (cap_mwh - soc) / EFF) if cap_mwh > 0 else 0.0
+            soc += can_take * EFF
+            curtailed[i] = net - can_take
+            residual[i] = 0.0
+            delivered[i] = 0.0
+        else:
+            deficit = -net
+            can_give = min(deficit / EFF, soc) if cap_mwh > 0 else 0.0
+            soc -= can_give
+            delivered[i] = can_give * EFF
+            residual[i] = deficit - delivered[i]
+            curtailed[i] = 0.0
+
+    return {
+        "gen": gen,
+        "direct": np.minimum(gen, demand),
+        "delivered": delivered,
+        "curtailed": curtailed,
+        "residual": residual,
+    }
+
+# %% [markdown]
 # ## Average capacity factors by technology, full 1980-2025 record
 #
 # Simple hourly mean of each technology's capacity factor over the full
 # 46-year PECD record — the long-run counterpart to `09`'s ~7-year figures.
 
 # %%
-TECHS = ["solar", "wind_onshore", "wind_offshore"]
 mean_cf_all_hours = {tech: cf[tech].mean() for tech in TECHS}
 
 for tech, value in mean_cf_all_hours.items():
@@ -241,39 +399,7 @@ plt.show()
 # ```
 
 # %% [markdown]
-# ## Today's installed capacity
-#
-# Same source and method as `09`: latest year-end snapshot from
-# `capacity_by_region_year`, offshore identified by region code prefix
-# `DEZZ`.
-
-# %%
-capacity_annual = pd.read_parquet(hub_file("capacity", "capacity_by_region_year.parquet"))
-is_offshore = capacity_annual["region_code"].str.startswith("DEZZ")
-latest_year = capacity_annual["year"].max()
-latest = capacity_annual[capacity_annual["year"] == latest_year]
-
-CURRENT_CAPACITY_MW = {
-    "solar": latest.loc[latest["technology"] == "solar", "capacity_mw"].sum(),
-    "wind_onshore": latest.loc[(latest["technology"] == "wind") & ~is_offshore.reindex(latest.index, fill_value=False), "capacity_mw"].sum(),
-    "wind_offshore": latest.loc[(latest["technology"] == "wind") & is_offshore.reindex(latest.index, fill_value=False), "capacity_mw"].sum(),
-}
-total_current_gw = sum(CURRENT_CAPACITY_MW.values()) / 1000
-
-print(f"Current installed capacity ({latest_year} snapshot):")
-for tech, mw in CURRENT_CAPACITY_MW.items():
-    print(f"  {tech:15s}  {mw / 1000:6.1f} GW")
-print(f"  {'total':15s}  {total_current_gw:6.1f} GW")
-
-
-def re_generation(buildout_multiplier: float) -> np.ndarray:
-    return sum(cf[t].values * CURRENT_CAPACITY_MW[t] * buildout_multiplier for t in TECHS)
-
-
-demand = np.full(len(cf), constant_demand_mw)
-
-# %% [markdown]
-# ## 1. Buildout alone, no storage
+# ## RE buildout alone, no storage
 #
 # Same four numbers per hour as `09`, by construction:
 #
@@ -339,123 +465,11 @@ plt.show()
 # ```
 
 # %% [markdown]
-# ## 2. Adding a battery: how much of the waste becomes useful?
+# ## Adding a battery: where the extra energy goes, at 2x buildout
 #
-# Same battery model as `09`: unlimited charge/discharge power, sized purely
-# by energy capacity as `N` hours of (now constant) average demand, 90%
-# round-trip efficiency split via `sqrt`.
-
-# %%
-BATTERY_ROUND_TRIP_EFFICIENCY = 0.90
-EFF = np.sqrt(BATTERY_ROUND_TRIP_EFFICIENCY)
-
-BATTERY_SCENARIOS = {"No battery": 0.0, "4h battery": 4.0, "24h battery": 24.0, "168h battery": 168.0}
-
-print("Battery scenarios (unlimited power; energy capacity = N hours of constant demand):")
-for label, duration_h in BATTERY_SCENARIOS.items():
-    cap_gwh = duration_h * avg_demand_mw / 1000
-    print(f"  {label:14s}  {duration_h:5.0f} h of demand   {cap_gwh:9,.0f} GWh  ({cap_gwh / 1000:.2f} TWh)")
-
-# %% [markdown]
-# ### A quick scale check, before the sweep
-#
-# The battery scenarios above are sized in hours of demand, and today's
-# fleet's capacity was introduced separately above -- easy to lose a feel
-# for how big any of these numbers actually are relative to each other. One
-# more bar chart, purely for orders of magnitude, no simulation involved:
-# average consumption (GW, a power quantity) next to a 1h and a 4h battery
-# (GWh, an energy quantity) next to today's total installed RE capacity
-# (GW again). GW and GWh are deliberately placed on the same axis here --
-# a battery sized at "N hours of average demand" has a GWh capacity that is,
-# by construction, the same number as N times the GW consumption figure, so
-# the bars are directly comparable in scale even though the units differ.
-
-# %%
-SCALE_CHECK_LABELS = ["Avg.\nconsumption\n(GW)", "1h battery\n(GWh)", "4h battery\n(GWh)", "Installed RE\ncapacity (GW)"]
-scale_check_simple_values = [
-    avg_demand_mw / 1000,
-    1.0 * avg_demand_mw / 1000,
-    BATTERY_SCENARIOS["4h battery"] * avg_demand_mw / 1000,
-]
-scale_check_simple_colors = [NEUTRAL, "#cfe3fa", BATTERY_COLORS["4h battery"]]
-
-fig, ax = plt.subplots(figsize=(8, 6))
-x = np.arange(len(SCALE_CHECK_LABELS))
-width = 0.6
-
-bars = ax.bar(x[:3], scale_check_simple_values, width, color=scale_check_simple_colors, edgecolor="white", linewidth=0.5)
-for bar, value in zip(bars, scale_check_simple_values):
-    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 2, f"{value:,.0f}", ha="center", va="bottom", fontsize=10)
-
-install_bottom = 0.0
-for tech, color, tech_label in [("solar", YELLOW, "Solar"), ("wind_onshore", BLUE, "Wind onshore"), ("wind_offshore", AQUA, "Wind offshore")]:
-    value_gw = CURRENT_CAPACITY_MW[tech] / 1000
-    ax.bar(x[3], value_gw, width, bottom=install_bottom, color=color, edgecolor="white", linewidth=0.5, label=tech_label)
-    install_bottom += value_gw
-ax.text(x[3], install_bottom + 2, f"{install_bottom:,.0f}", ha="center", va="bottom", fontsize=10)
-
-ax.set_xticks(x)
-ax.set_xticklabels(SCALE_CHECK_LABELS)
-ax.set_ylabel("GW (power) or GWh (energy) -- see caption")
-ax.set_title("Orders of magnitude: consumption, battery sizes, installed capacity (today)")
-ax.set_ylim(0, install_bottom * 1.2)
-ax.yaxis.grid(True, linewidth=0.4, alpha=0.6)
-ax.set_axisbelow(True)
-ax.legend(fontsize=9, loc="upper left")
-fig.tight_layout()
-fig.savefig(paths.images_path / "05_scale_check_bars.png", dpi=150, bbox_inches="tight")
-plt.show()
-
-# %% [markdown]
-# ```{figure} ../../output/images/05_scale_check_bars.png
-# :name: fig-05-scale-check-bars
-# Average consumption (GW), a 1h and a 4h battery's energy capacity (GWh),
-# and today's total installed RE capacity (GW, stacked by technology).
-# Today's fleet is already ~3x average demand in nameplate GW -- but with
-# solar's ~11% and wind's ~24-43% capacity factors (see the bar chart
-# above), that nameplate figure doesn't translate directly into average
-# output. A 4h battery, at ~246 GWh, is a small fraction of a single day's
-# ~1,475 GWh of demand -- context for why the sweep below needs
-# 24h/168h batteries before storage alone can meaningfully close the gap.
-# ```
-
-# %%
-def simulate(buildout_multiplier: float, duration_h: float) -> dict[str, np.ndarray]:
-    """Hourly (generation, direct, delivered, curtailed, residual) arrays for one scenario."""
-    gen = re_generation(buildout_multiplier)
-    cap_mwh = duration_h * avg_demand_mw
-
-    n = len(gen)
-    soc = 0.0
-    residual = np.empty(n)
-    curtailed = np.empty(n)
-    delivered = np.empty(n)
-    for i in range(n):
-        net = gen[i] - demand[i]
-        if net > 0:
-            can_take = min(net, (cap_mwh - soc) / EFF) if cap_mwh > 0 else 0.0
-            soc += can_take * EFF
-            curtailed[i] = net - can_take
-            residual[i] = 0.0
-            delivered[i] = 0.0
-        else:
-            deficit = -net
-            can_give = min(deficit / EFF, soc) if cap_mwh > 0 else 0.0
-            soc -= can_give
-            delivered[i] = can_give * EFF
-            residual[i] = deficit - delivered[i]
-            curtailed[i] = 0.0
-
-    return {
-        "gen": gen,
-        "direct": np.minimum(gen, demand),
-        "delivered": delivered,
-        "curtailed": curtailed,
-        "residual": residual,
-    }
-
-# %% [markdown]
-# ### Where the extra energy goes, at one buildout level (2x)
+# Same battery model introduced above. At one fixed buildout level (2x),
+# how does the surplus/deficit split between direct use, battery-delivered,
+# still-curtailed, and still-residual, as battery size grows?
 
 # %%
 DEMO_MULTIPLIER = 2.0
@@ -506,41 +520,6 @@ plt.show()
 # :name: fig-05-battery-decomposition-2x
 # At 2x buildout, how the surplus/deficit splits between direct use,
 # battery-delivered, still-curtailed, and still-residual, by battery size.
-# ```
-
-# %% [markdown]
-# ### Does storage's marginal value hold up across the whole buildout range?
-
-# %%
-delivered_rows = []
-for multiplier in MULTIPLIERS:
-    row = {"multiplier": multiplier}
-    for label, duration_h in BATTERY_SCENARIOS.items():
-        if duration_h == 0:
-            continue
-        row[label] = simulate(multiplier, duration_h)["delivered"].mean() / 1000
-    delivered_rows.append(row)
-delivered_df = pd.DataFrame(delivered_rows)
-
-fig, ax = plt.subplots(figsize=(9, 5.5))
-for label in ["4h battery", "24h battery", "168h battery"]:
-    ax.plot(delivered_df["multiplier"], delivered_df[label], marker="o", markersize=4,
-            linewidth=1.8, color=BATTERY_COLORS[label], label=label)
-ax.set_xlabel("RE buildout multiplier (x today's fleet)")
-ax.set_ylabel("Average energy delivered from storage [GW]")
-ax.set_title("Storage's average contribution peaks, then fades (1980-2025, constant demand)")
-ax.yaxis.grid(True, linewidth=0.4, alpha=0.6)
-ax.set_axisbelow(True)
-ax.legend(fontsize=9, loc="upper right")
-fig.tight_layout()
-fig.savefig(paths.images_path / "05_battery_delivered_vs_multiplier.png", dpi=150, bbox_inches="tight")
-plt.show()
-
-# %% [markdown]
-# ```{figure} ../../output/images/05_battery_delivered_vs_multiplier.png
-# :name: fig-05-battery-delivered-vs-multiplier
-# Average energy delivered from storage across the buildout range, one line
-# per battery size.
 # ```
 
 # %% [markdown]
@@ -602,36 +581,38 @@ plt.show()
 # ```
 
 # %% [markdown]
-# ## Peak residual load: the backup capacity question
-#
-# The single worst hour's residual load (as a fraction of the constant
-# demand reference) per scenario — what a gas fleet (or import capacity)
-# sized for "the worst hour in 46 years" would need to cover.
+# ## Does storage's marginal value hold up across the whole buildout range?
 
 # %%
-fig, ax = plt.subplots(figsize=(9, 5.5))
-for label in BATTERY_SCENARIOS:
-    sub = results[results["battery"] == label].sort_values("multiplier")
-    ax.plot(sub["multiplier"], sub["peak_residual_frac"] * 100, marker="o", markersize=4,
-            linewidth=1.8, color=BATTERY_COLORS[label], label=label)
+delivered_rows = []
+for multiplier in MULTIPLIERS:
+    row = {"multiplier": multiplier}
+    for label, duration_h in BATTERY_SCENARIOS.items():
+        if duration_h == 0:
+            continue
+        row[label] = simulate(multiplier, duration_h)["delivered"].mean() / 1000
+    delivered_rows.append(row)
+delivered_df = pd.DataFrame(delivered_rows)
 
-ax.axhline(100, color=NEUTRAL, linewidth=1, linestyle="--", zorder=0)
-ax.text(MULTIPLIERS[-1], 100, " = constant demand", color=NEUTRAL, fontsize=8, va="bottom", ha="right")
+fig, ax = plt.subplots(figsize=(9, 5.5))
+for label in ["4h battery", "24h battery", "168h battery"]:
+    ax.plot(delivered_df["multiplier"], delivered_df[label], marker="o", markersize=4,
+            linewidth=1.8, color=BATTERY_COLORS[label], label=label)
 ax.set_xlabel("RE buildout multiplier (x today's fleet)")
-ax.set_ylabel("Peak residual load [% of constant demand]")
-ax.set_title("Only a very large, power-unconstrained battery ever fully closes this")
+ax.set_ylabel("Average energy delivered from storage [GW]")
+ax.set_title("Storage's average contribution peaks, then fades (1980-2025, constant demand)")
 ax.yaxis.grid(True, linewidth=0.4, alpha=0.6)
 ax.set_axisbelow(True)
-ax.legend(fontsize=8, loc="lower left")
+ax.legend(fontsize=9, loc="upper right")
 fig.tight_layout()
-fig.savefig(paths.images_path / "05_peak_residual_load.png", dpi=150, bbox_inches="tight")
+fig.savefig(paths.images_path / "05_battery_delivered_vs_multiplier.png", dpi=150, bbox_inches="tight")
 plt.show()
 
 # %% [markdown]
-# ```{figure} ../../output/images/05_peak_residual_load.png
-# :name: fig-05-peak-residual-load
-# Worst single hour's residual load, as a share of the constant demand
-# reference, by buildout multiplier and battery size.
+# ```{figure} ../../output/images/05_battery_delivered_vs_multiplier.png
+# :name: fig-05-battery-delivered-vs-multiplier
+# Average energy delivered from storage across the buildout range, one line
+# per battery size.
 # ```
 
 # %% [markdown]
@@ -725,6 +706,39 @@ total_hours = len(near_ideal["residual"])
 print(f"Hours with any residual load at all: {nonzero_hours:,} of {total_hours:,} ({nonzero_hours / total_hours:.3%})")
 print(f"Worst of those hours: {near_ideal['residual'].max() / 1000:.1f} GW "
       f"({near_ideal['residual'].max() / avg_demand_mw:.0%} of constant demand)")
+
+# %% [markdown]
+# ## Peak residual load: the backup capacity question
+#
+# The single worst hour's residual load (as a fraction of the constant
+# demand reference) per scenario — what a gas fleet (or import capacity)
+# sized for "the worst hour in 46 years" would need to cover.
+
+# %%
+fig, ax = plt.subplots(figsize=(9, 5.5))
+for label in BATTERY_SCENARIOS:
+    sub = results[results["battery"] == label].sort_values("multiplier")
+    ax.plot(sub["multiplier"], sub["peak_residual_frac"] * 100, marker="o", markersize=4,
+            linewidth=1.8, color=BATTERY_COLORS[label], label=label)
+
+ax.axhline(100, color=NEUTRAL, linewidth=1, linestyle="--", zorder=0)
+ax.text(MULTIPLIERS[-1], 100, " = constant demand", color=NEUTRAL, fontsize=8, va="bottom", ha="right")
+ax.set_xlabel("RE buildout multiplier (x today's fleet)")
+ax.set_ylabel("Peak residual load [% of constant demand]")
+ax.set_title("Only a very large, power-unconstrained battery ever fully closes this")
+ax.yaxis.grid(True, linewidth=0.4, alpha=0.6)
+ax.set_axisbelow(True)
+ax.legend(fontsize=8, loc="lower left")
+fig.tight_layout()
+fig.savefig(paths.images_path / "05_peak_residual_load.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/05_peak_residual_load.png
+# :name: fig-05-peak-residual-load
+# Worst single hour's residual load, as a share of the constant demand
+# reference, by buildout multiplier and battery size.
+# ```
 
 # %% [markdown]
 # ## Residual-load duration curve, holding battery size fixed at 24h
