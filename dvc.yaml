@@ -64,6 +64,41 @@ stages:
       - output/images/04_windspeed_reconstruction_scatter.png:
           cache: false
 
+  pecd_de_capacity_factors_vs_constant_demand:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
+      pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
+    deps:
+      - pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py
+      - ../energy-data-hub/data/pecd/pecd_country_capacity_factors_simple_de.parquet
+      - ../energy-data-hub/data/smard/load.parquet
+      - ../energy-data-hub/data/capacity/capacity_by_region_year.parquet
+    outs:
+      - book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb:
+          cache: false
+      - output/images/05_demand_2025_vs_constant_peak.png:
+          cache: false
+      - output/images/05_pecd_de_capacity_factors_bar.png:
+          cache: false
+      - output/images/05_buildout_no_battery_bars.png:
+          cache: false
+      - output/images/05_battery_decomposition_2x.png:
+          cache: false
+      - output/images/05_battery_delivered_vs_multiplier.png:
+          cache: false
+      - output/images/05_re_share_and_curtailment.png:
+          cache: false
+      - output/images/05_peak_residual_load.png:
+          cache: false
+      - output/images/05_worst_drawdown.png:
+          cache: false
+      - output/images/05_residual_duration_curve.png:
+          cache: false
+
   download_example:
     cmd: uv run python pipeline/01_download_example.py
     deps:

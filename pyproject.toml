@@ -18,6 +18,7 @@ dependencies = [
     "pandas>=2.2.0",
     "pyarrow>=17.0.0",
     "windpowerlib>=0.2.2",
+    "astral>=3.2",
 ]
 
 [build-system]

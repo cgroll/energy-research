@@ -53,6 +53,74 @@ dependency and the SCADA download is a much heavier pull (~1.5 GB vs.
 ~1.5 MB for the grid meter), so this stays here pending a decision on
 whether it's worth that cost for the stable platform.
 
+**2026-09-30 — New sub-topic: long-run PECD capacity factors vs a constant
+demand baseline.** A different angle from the Kelmarsh/ENTSO-E plant-level
+validation work above, prompted by comparing `energy-insights`' `09` page
+(`09_re_buildout_battery_residual_load`, ~7-year real-SMARD-demand window)
+against `world-of-energy`'s `41_demand_coverage` (47-year PECD-ERA5 window,
+reconstructed demand) — the two showed similar demand/capacity magnitudes
+but a ~10-15pp gap in average RE coverage, plausibly from PECD's raw
+capacity-factor level rather than the demand side. Built here as
+`pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py`
+(`book/notebooks/05_...ipynb`), using the hub's `pecd_country_capacity_factors_simple_de`
+asset (DE-only, technology-mix "simple" aggregation, **1980-2025**, the same
+non-MaStR-weighted product `09` uses) against a **constant** demand
+reference (mean of 2025's 365 daily peak SMARD loads, 61.5 GW) instead of
+an hourly demand series — isolating the supply side from any particular
+demand time series entirely.
+- Long-run (1980-2025) mean capacity factors: solar 10.7% (all hours) /
+  20.9% (Berlin daylight hours only, via `astral`, sunrise/sunset computed
+  directly in UTC to match PECD's UTC timestamps), wind onshore 23.6%,
+  wind offshore 43.0%.
+- These land within ~1pp of the same technology's mean capacity factor over
+  `09`'s much shorter 2018-2025 window (solar 10.9%, onshore 23.1%,
+  offshore 42.8%) — the 46-year record doesn't change the picture
+  qualitatively, which also means the `09` vs `41` coverage gap is **not**
+  explained by `09`'s shorter window sampling an unrepresentative slice of
+  weather history. The likely explanation still points to `41` using a
+  higher effective capacity-factor level than this "simple" DE product
+  (not yet directly confirmed — would need to open `41`'s own capacity
+  factor source line by line).
+- Not a validation-against-real-generation result (no plant/meter ground
+  truth involved here, unlike Kelmarsh) — purely a supply-side
+  characterization + a first constant-demand-baseline visualization.
+  `astral` added as a new dependency for this.
+
+**Same day, same script — extended to the full `09` replication.** Ported
+`09`'s entire buildout-multiplier + battery-size sweep (direct use /
+curtailed / residual decomposition, battery decomposition at 2x, delivered-
+vs-multiplier, RE-share + curtailment two-panel, peak residual load, worst
+multi-day drawdown, residual duration curve, four-scenario summary table)
+into the same script, run against the full 1980-2025 weather record with
+the constant 61.5 GW demand reference substituted for `09`'s real hourly
+SMARD series throughout. Nine chart PNGs total now (`05_*.png`).
+- Headline numbers land in the same shape as `09` despite the very
+  different demand treatment: e.g. today's fleet (1x) covers ~52% of the
+  constant demand directly (`09`: 56% of real demand); a 24h battery at 2x
+  buildout reaches ~91% average coverage (`09`: ~94%); only the 168h/10.3
+  TWh battery ever fully closes the peak-residual and worst-drawdown tails,
+  and only from ~4x buildout on (`09`: similar, ~4x-5x). Battery capacities
+  come out ~11% larger than `09`'s (168h now 10.33 TWh vs. 9.3 TWh) simply
+  because the constant reference (61.5 GW, a peak-load mean) sits above
+  `09`'s real average-hourly-demand figure (55.4 GW) by construction.
+- **Real bug caught and fixed:** the worst-drawdown metric
+  (`worst_drawdown_days`, a `np.cumsum` over ~400k hourly terms) hit
+  float64 cancellation noise once a battery fully closed the gap — printed
+  fine when rounded for display, but on the log-scale chart a scenario's
+  "true" result of 0 came out as ~1e-18, which log-scale renders as a
+  nonsensical vertical plunge to the bottom of the axis, wrecking
+  readability of every other series. Fixed by flooring any drawdown below
+  10 MWh (utterly negligible at this system's GW scale, but far above the
+  float-noise floor) to an exact zero, then masking exact zeros to `NaN`
+  for that one plot so the line simply stops where the gap is closed,
+  documented in the figure caption. Worth remembering generally: a
+  `cumsum`-based metric over hundreds of thousands of terms needs an
+  explicit near-zero floor before it's plotted on a log scale.
+- Kept `09`'s own "chronic deficit" caveat (1.0x-1.5x buildout: the
+  "episode" is effectively the whole record, not a discrete weather event)
+  — even more pronounced here (thousands of demand-days vs. single digits
+  from 2x on) since the record is 46 years instead of 7.
+
 ## Next Steps
 
 1. Decide whether the wind-speed-reconstruction result (round 2, above)
