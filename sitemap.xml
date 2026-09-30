@@ -19,4 +19,7 @@
   <url>
     <loc>http://localhost:3000/notebooks/pecd-country-and-regional-capacity-factors</loc>
   </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/balancing-market-prices</loc>
+  </url>
 </urlset>
