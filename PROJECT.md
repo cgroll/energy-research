@@ -202,6 +202,56 @@ build:
   fixed multiplier, going 0h->4h battery only shaves off ~1-3 GW — battery
   duration would need to go well beyond 4h (as the existing 24h/168h
   scenarios do) before it rivals buildout's effect.
+- The heatmap's colormap was switched to a red-yellow-green "traffic light"
+  ramp (`RdYlGn_r` -- reversed so red = high/bad residual, green = low/good),
+  a deliberate one-off deviation from the platform's usual single-hue
+  sequential magnitude encoding. Needed a luminance-based per-cell text
+  color (rather than a simple high/low split) since a 3-hue ramp's light
+  and dark ends both need white text while its yellow middle needs dark
+  text.
+- **Trimmed and promoted into `energy-insights` as the new `09` page,
+  2026-09-30.** Removed everything from "Does the worst multi-day shortfall
+  ever go away?" through the end of this notebook (that section, the
+  near-ideal-case look, peak residual load, the residual-load duration
+  curve, the four-scenario summary, and takeaways) -- the page now ends
+  after "does storage's marginal value hold up across the whole buildout
+  range?". The trimmed content then fully replaced `energy-insights`'
+  `pages/09_re_buildout_battery_residual_load.py` (previously the
+  real-hourly-SMARD-demand / ~7-year version) -- ported with its
+  `{figure}`/`savefig` blocks stripped out to match that repo's plain
+  `plt.show()` + prose convention, interpretive paragraphs rewritten with
+  numbers pulled from an actual run rather than guessed, and its Dagster
+  asset's `deps`/description updated (`pecd_country_capacity_factors_simple_de`
+  instead of the all-country asset). The real-demand/~7-year version and the
+  peak-residual/worst-drawdown analysis dropped in the trim now live only
+  here in `energy-research` (this file, pre-trim, in git history) -- not
+  duplicated anywhere else.
+
+**2026-09-30 — New sub-topic: first look at the hub's new balancing-market
+data.** `energy-data-hub` just gained reBAP (netztransparenz.de, 15-min,
+since 2014) and FCR/aFRR capacity prices (regelleistung.net, daily x 4h
+block, since 2021/2018-10) as `data_derived_watermark` assets. Built
+`pipeline/07_balancing_market_prices.py` (`book/notebooks/07_...ipynb`):
+for each series, a time-series plot, a boxplot by 4-hour time-of-day
+block, average-by-calendar-month (seasonality), average-by-year (trend),
+weekday vs. weekend, and a per-year data-completeness check.
+- **Timezone care carried over from the hub's own README:** FCR/aFRR's
+  4-hour block columns are German local time (CET/CEST), not UTC, but
+  reBAP's own timestamps are naive UTC (hub convention) -- converted
+  reBAP to `Europe/Berlin` before every block/weekday/month/year grouping
+  here so the three series' time-of-day views are genuinely comparable,
+  not just superficially similar.
+- **Completeness check needed a two-sided fix, not just one:** a first
+  version only capped the *current* (incomplete) year at each series' own
+  max timestamp -- correct for avoiding a fake "gap" in 2026, but it also
+  showed aFRR's 2018 as ~75% missing, since aFRR genuinely only starts
+  2018-10-01 and the check was still comparing against a full
+  Jan-1-to-Dec-31 expectation. Fixed by capping the *first* year at the
+  series' own min timestamp too -- 2018 now correctly shows ~0% missing
+  (no real gap within the period aFRR actually covers). All three series
+  land at >99.9% complete in every full year; FCR's one known gap
+  (2021-10-03, German Unity Day) is too small to move the yearly number
+  much.
 
 ## Next Steps
 
