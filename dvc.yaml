@@ -86,6 +86,8 @@ stages:
           cache: false
       - output/images/05_buildout_no_battery_bars.png:
           cache: false
+      - output/images/05_scale_check_bars.png:
+          cache: false
       - output/images/05_battery_decomposition_2x.png:
           cache: false
       - output/images/05_battery_delivered_vs_multiplier.png:

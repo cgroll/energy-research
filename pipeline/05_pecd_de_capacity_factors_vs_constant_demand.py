@@ -356,7 +356,70 @@ for label, duration_h in BATTERY_SCENARIOS.items():
     cap_gwh = duration_h * avg_demand_mw / 1000
     print(f"  {label:14s}  {duration_h:5.0f} h of demand   {cap_gwh:9,.0f} GWh  ({cap_gwh / 1000:.2f} TWh)")
 
+# %% [markdown]
+# ### A quick scale check, before the sweep
+#
+# The battery scenarios above are sized in hours of demand, and today's
+# fleet's capacity was introduced separately above -- easy to lose a feel
+# for how big any of these numbers actually are relative to each other. One
+# more bar chart, purely for orders of magnitude, no simulation involved:
+# average consumption (GW, a power quantity) next to a 1h and a 4h battery
+# (GWh, an energy quantity) next to today's total installed RE capacity
+# (GW again). GW and GWh are deliberately placed on the same axis here --
+# a battery sized at "N hours of average demand" has a GWh capacity that is,
+# by construction, the same number as N times the GW consumption figure, so
+# the bars are directly comparable in scale even though the units differ.
 
+# %%
+SCALE_CHECK_LABELS = ["Avg.\nconsumption\n(GW)", "1h battery\n(GWh)", "4h battery\n(GWh)", "Installed RE\ncapacity (GW)"]
+scale_check_simple_values = [
+    avg_demand_mw / 1000,
+    1.0 * avg_demand_mw / 1000,
+    BATTERY_SCENARIOS["4h battery"] * avg_demand_mw / 1000,
+]
+scale_check_simple_colors = [NEUTRAL, "#cfe3fa", BATTERY_COLORS["4h battery"]]
+
+fig, ax = plt.subplots(figsize=(8, 6))
+x = np.arange(len(SCALE_CHECK_LABELS))
+width = 0.6
+
+bars = ax.bar(x[:3], scale_check_simple_values, width, color=scale_check_simple_colors, edgecolor="white", linewidth=0.5)
+for bar, value in zip(bars, scale_check_simple_values):
+    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 2, f"{value:,.0f}", ha="center", va="bottom", fontsize=10)
+
+install_bottom = 0.0
+for tech, color, tech_label in [("solar", YELLOW, "Solar"), ("wind_onshore", BLUE, "Wind onshore"), ("wind_offshore", AQUA, "Wind offshore")]:
+    value_gw = CURRENT_CAPACITY_MW[tech] / 1000
+    ax.bar(x[3], value_gw, width, bottom=install_bottom, color=color, edgecolor="white", linewidth=0.5, label=tech_label)
+    install_bottom += value_gw
+ax.text(x[3], install_bottom + 2, f"{install_bottom:,.0f}", ha="center", va="bottom", fontsize=10)
+
+ax.set_xticks(x)
+ax.set_xticklabels(SCALE_CHECK_LABELS)
+ax.set_ylabel("GW (power) or GWh (energy) -- see caption")
+ax.set_title("Orders of magnitude: consumption, battery sizes, installed capacity (today)")
+ax.set_ylim(0, install_bottom * 1.2)
+ax.yaxis.grid(True, linewidth=0.4, alpha=0.6)
+ax.set_axisbelow(True)
+ax.legend(fontsize=9, loc="upper left")
+fig.tight_layout()
+fig.savefig(paths.images_path / "05_scale_check_bars.png", dpi=150, bbox_inches="tight")
+plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/05_scale_check_bars.png
+# :name: fig-05-scale-check-bars
+# Average consumption (GW), a 1h and a 4h battery's energy capacity (GWh),
+# and today's total installed RE capacity (GW, stacked by technology).
+# Today's fleet is already ~3x average demand in nameplate GW -- but with
+# solar's ~11% and wind's ~24-43% capacity factors (see the bar chart
+# above), that nameplate figure doesn't translate directly into average
+# output. A 4h battery, at ~246 GWh, is a small fraction of a single day's
+# ~1,475 GWh of demand -- context for why the sweep below needs
+# 24h/168h batteries before storage alone can meaningfully close the gap.
+# ```
+
+# %%
 def simulate(buildout_multiplier: float, duration_h: float) -> dict[str, np.ndarray]:
     """Hourly (generation, direct, delivered, curtailed, residual) arrays for one scenario."""
     gen = re_generation(buildout_multiplier)

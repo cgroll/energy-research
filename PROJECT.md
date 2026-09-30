@@ -161,6 +161,34 @@ country-level number. Built here as
   from the resolution question onward is new content that page doesn't
   cover.
 
+**Same day, follow-ups.** Three small additions on top of the two
+2026-09-30 sub-topics above, each requested separately after the initial
+build:
+- `06_pecd_country_and_regional_capacity_factors` gained a choropleth map
+  (solar/onshore/offshore-country-mean) alongside its existing bar chart,
+  Italy/Denmark called out on the solar map — the bar chart ranks countries
+  precisely, the map makes the geographic pattern (south-north solar,
+  Atlantic/North Sea wind) visible at a glance. Pulled in `cartopy` +
+  `shapely` as new dependencies (same Natural Earth country-geometry
+  approach as `energy-insights`' `08`).
+- All four real analysis notebooks (`02_compare_kelmarsh_pecd`,
+  `04_compare_windspeed_reconstruction`, `05_...constant_demand`,
+  `06_...capacity_factors`) were built under `book/notebooks/` from the
+  start but never added to `book/myst.yml`'s `toc` — the published book
+  only ever rendered the original template example. Fixed; verified with
+  `myst build --check-links`.
+- `05_pecd_de_capacity_factors_vs_constant_demand` gained one more bar
+  chart, purely for orders-of-magnitude intuition: average consumption
+  (61.5 GW) next to a 1h battery (61.5 GWh) and a 4h battery (246 GWh) next
+  to today's total installed RE capacity (192 GW, stacked by technology).
+  No new simulation — GW and GWh deliberately share one axis here, since a
+  battery sized at "N hours of average demand" has a GWh figure that's by
+  construction N times the GW demand figure, so the bars are scale-comparable
+  despite the unit difference. Headline: today's fleet is already ~3x
+  demand in nameplate GW, but a 4h battery is still only ~17% of one day's
+  demand (246 GWh vs. ~1,475 GWh/day) — context for why the existing sweep
+  needs 24h/168h batteries before storage alone meaningfully closes the gap.
+
 ## Next Steps
 
 1. Decide whether the wind-speed-reconstruction result (round 2, above)

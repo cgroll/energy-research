@@ -141,12 +141,12 @@ stages:
       size: 47334908
     - path: pipeline/04_compare_windspeed_reconstruction.py
       hash: md5
-      md5: 787708d01579c636fdcbcd3aead26286
-      size: 16631
+      md5: d8bda7dc788b2b07aa54da1d8bbaba0d
+      size: 16632
     outs:
     - path: book/notebooks/04_compare_windspeed_reconstruction.ipynb
       hash: md5
-      md5: ff9bdf96f4ace0afa1077e4de10c0f85
+      md5: 4d0513732a106b09e8a896e198591a31
       size: 29969
     - path: output/images/04_windspeed_reconstruction_daily.png
       hash: md5
@@ -179,13 +179,13 @@ stages:
       size: 1012396
     - path: pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py
       hash: md5
-      md5: a9c86fe9b8cf0d221fa4bfbc59543260
-      size: 32175
+      md5: d225e0ebe31856009837b73fa2a766e3
+      size: 35365
     outs:
     - path: book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
       hash: md5
-      md5: 7c8c756a8c99bfff03e6eaf7f012597a
-      size: 56652
+      md5: a716d933e4ed35eb6b9cb94af0b4f188
+      size: 61549
     - path: output/images/05_battery_decomposition_2x.png
       hash: md5
       md5: d4586da5adae6e27563877d6eed841ae
@@ -218,6 +218,10 @@ stages:
       hash: md5
       md5: 0f3c0b73a53cfe7f76dc24b9c2c22655
       size: 87363
+    - path: output/images/05_scale_check_bars.png
+      hash: md5
+      md5: 95c6b9668758a666ab179bfa88c62e55
+      size: 61861
     - path: output/images/05_worst_drawdown.png
       hash: md5
       md5: b9259eba1cdb6ad43e5b3eb2fffa2ed3
