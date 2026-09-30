@@ -23,6 +23,9 @@ project:
       children:
         - file: notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
         - file: notebooks/06_pecd_country_and_regional_capacity_factors.ipynb
+    - title: Balancing markets
+      children:
+        - file: notebooks/07_balancing_market_prices.ipynb
 site:
   options:
     folders: true

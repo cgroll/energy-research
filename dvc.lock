@@ -179,13 +179,13 @@ stages:
       size: 1012396
     - path: pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py
       hash: md5
-      md5: 3bf6c3c5cb5c0d3bfd05f2623a395d5b
-      size: 39184
+      md5: a2631c5831868840522fc3a6dec5c2b8
+      size: 29092
     outs:
     - path: book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
       hash: md5
-      md5: e74847a8f38f1775d26b7741bc9c166f
-      size: 66867
+      md5: 1cab4a2fe4c8b6a684032598e4ed98a7
+      size: 49557
     - path: output/images/05_battery_decomposition_2x.png
       hash: md5
       md5: d4586da5adae6e27563877d6eed841ae
@@ -202,10 +202,6 @@ stages:
       hash: md5
       md5: 020efe5d72e1f05b2cba9443936cc456
       size: 396726
-    - path: output/images/05_peak_residual_load.png
-      hash: md5
-      md5: 24cabdd44d43543737b1b64863ad0260
-      size: 73896
     - path: output/images/05_pecd_de_capacity_factors_bar.png
       hash: md5
       md5: b75c21e1bd2a5d94cee22ff2c50b6a51
@@ -214,10 +210,6 @@ stages:
       hash: md5
       md5: 4dc85aa185ca9e079fc7d95804ec356c
       size: 190685
-    - path: output/images/05_residual_duration_curve.png
-      hash: md5
-      md5: 0f3c0b73a53cfe7f76dc24b9c2c22655
-      size: 87363
     - path: output/images/05_residual_load_heatmap.png
       hash: md5
       md5: 4ee483c938abb2a318cae404c3de0e65
@@ -226,10 +218,6 @@ stages:
       hash: md5
       md5: 95c6b9668758a666ab179bfa88c62e55
       size: 61861
-    - path: output/images/05_worst_drawdown.png
-      hash: md5
-      md5: b9259eba1cdb6ad43e5b3eb2fffa2ed3
-      size: 95812
   pecd_country_and_regional_capacity_factors:
     cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
       python3 --output
@@ -297,3 +285,59 @@ stages:
       hash: md5
       md5: d16ebc52a0eded0bf88706d7bfaea521
       size: 115467
+  balancing_market_prices:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
+      python3 --output book/notebooks/07_balancing_market_prices.ipynb
+      pipeline/07_balancing_market_prices.py && uv run python
+      pipeline/_strip_jupytext_metadata.py
+      book/notebooks/07_balancing_market_prices.ipynb
+    deps:
+    - path: ../energy-data-hub/data/balancing_market/afrr_capacity_price.parquet
+      hash: md5
+      md5: b7dcb7f5c091224f37e9f9a96832bfa9
+      size: 184233
+    - path: ../energy-data-hub/data/balancing_market/fcr_capacity_price.parquet
+      hash: md5
+      md5: dd808491498d2f95ed2975640d65b804
+      size: 76193
+    - path: ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      hash: md5
+      md5: c75aa3d42d1180ae5c357591107ea003
+      size: 5331723
+    - path: pipeline/07_balancing_market_prices.py
+      hash: md5
+      md5: 9e7fdade9b8667a6dbd065ed59bc4822
+      size: 17726
+    outs:
+    - path: book/notebooks/07_balancing_market_prices.ipynb
+      hash: md5
+      md5: d224763ab18543abd2c25b28b5e3f95f
+      size: 28948
+    - path: output/images/07_afrr_analysis.png
+      hash: md5
+      md5: 7a2a496491d00266a625c459994a9645
+      size: 139660
+    - path: output/images/07_afrr_timeseries.png
+      hash: md5
+      md5: ad63946b8b2b1b1d1adee9cec76afc0c
+      size: 150738
+    - path: output/images/07_fcr_analysis.png
+      hash: md5
+      md5: 9b0d7c1bdbce6810dc263b9a8004f2ae
+      size: 123856
+    - path: output/images/07_fcr_timeseries.png
+      hash: md5
+      md5: 17a37ead4fb60554d9e467f5bc3c294b
+      size: 99542
+    - path: output/images/07_missing_observations.png
+      hash: md5
+      md5: 11b973a10881f1cab4154413aa39995b
+      size: 65767
+    - path: output/images/07_rebap_analysis.png
+      hash: md5
+      md5: b962d6b744a62f89df0514a9fca17824
+      size: 126105
+    - path: output/images/07_rebap_timeseries.png
+      hash: md5
+      md5: a84e11305d09cda0f1ad3b932f2159ad
+      size: 84198

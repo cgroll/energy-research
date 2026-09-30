@@ -96,12 +96,6 @@ stages:
           cache: false
       - output/images/05_residual_load_heatmap.png:
           cache: false
-      - output/images/05_peak_residual_load.png:
-          cache: false
-      - output/images/05_worst_drawdown.png:
-          cache: false
-      - output/images/05_residual_duration_curve.png:
-          cache: false
 
   pecd_country_and_regional_capacity_factors:
     cmd: >-
@@ -130,6 +124,37 @@ stages:
       - output/images/06_wind_onshore_zone_spread.png:
           cache: false
       - output/images/06_de_solar_nuts2_bar.png:
+          cache: false
+
+  balancing_market_prices:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/07_balancing_market_prices.ipynb
+      pipeline/07_balancing_market_prices.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/07_balancing_market_prices.ipynb
+    deps:
+      - pipeline/07_balancing_market_prices.py
+      - ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      - ../energy-data-hub/data/balancing_market/fcr_capacity_price.parquet
+      - ../energy-data-hub/data/balancing_market/afrr_capacity_price.parquet
+    outs:
+      - book/notebooks/07_balancing_market_prices.ipynb:
+          cache: false
+      - output/images/07_rebap_timeseries.png:
+          cache: false
+      - output/images/07_rebap_analysis.png:
+          cache: false
+      - output/images/07_fcr_timeseries.png:
+          cache: false
+      - output/images/07_fcr_analysis.png:
+          cache: false
+      - output/images/07_afrr_timeseries.png:
+          cache: false
+      - output/images/07_afrr_analysis.png:
+          cache: false
+      - output/images/07_missing_observations.png:
           cache: false
 
   download_example:
