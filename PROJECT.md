@@ -253,6 +253,89 @@ weekday vs. weekend, and a per-year data-completeness check.
   (2021-10-03, German Unity Day) is too small to move the yearly number
   much.
 
+**2026-09-30 — New sub-topic: does reBAP actually track the real system
+imbalance?** Prompted by a question about what reBAP's relationship to
+the day-ahead price actually means: reBAP should sit above day-ahead when
+the system is short and below it when long, so the spread
+`reBAP - day-ahead` is a plausible *indirect* proxy for imbalance
+direction. netztransparenz.de separately publishes the direct, ground-
+truth figure for this -- the **NRV-Saldo** (Netzregelverbund-Saldo),
+Germany's aggregate imbalance in MW, positive when under-supplied and
+negative when over-supplied.
+- **`pipeline/08_download_nrv_saldo.py`** (experimental, not yet promoted
+  to `energy-data-hub`): same `CsvDownloadHandler.ashx` LotesCharts
+  mechanism as `edh/rebap.py`, discovered the same way (reading the
+  chart's own inline JSON config, this time embedded directly in the page
+  HTML rather than needing `DownloadHandler.js`). `ProduktId=6` /
+  `WebApiRoute=NrvSaldo/nrvsaldo/qualitaetsgesichert` is the
+  quality-assured series, `TsoIds=[0]` gives the single national
+  aggregate. Same 2014-01-01 start and ~2-week quality-assurance lag as
+  reBAP (same underlying settlement process).
+- **Real, multi-month gaps found -- not a download bug.** Unlike reBAP
+  (near-perfectly complete), NRV-Saldo has substantial missing stretches:
+  2014/2015 (~8.5% each), 2016 (a single unbroken gap 02-11 to 10-31,
+  ~72% of the year), 2018 (three gaps, ~33% total), 2022 (a single gap
+  02-28 to 05-31, ~25%). 2017, 2019-2021, and 2023-2026 are each ≥99.99%
+  complete. `09_nrv_saldo_vs_rebap.py` restricts to those clean years.
+- **The proxy story holds up against the real thing.** Joined reBAP,
+  `smard_price_de_lu` (day-ahead, forward-filled hourly->15min), and
+  NRV-Saldo on their shared 15-min grid, clean years only (~235k
+  quarter-hours): the spread has the same sign as NRV-Saldo 93.7% of the
+  time, and mean spread rises monotonically across NRV-Saldo quintiles
+  (-70 EUR/MWh most-over-supplied -> +85 EUR/MWh most-under-supplied,
+  no reversals) -- despite only a moderate linear correlation (Pearson r
+  ≈ 0.35), since reBAP moves in sharp merit-order jumps rather than
+  scaling smoothly with imbalance volume. Conclusion: the price spread is
+  a solid *directional* signal, not a precise stand-in for the real MW
+  figure -- NRV-Saldo is still the more honest variable when direction
+  specifically matters, gaps notwithstanding.
+
+**Same day, follow-ups from exploratory discussion (no new downloads).**
+Three things investigated conversationally that turned up real,
+non-obvious findings, one of which became a new page:
+- **`pipeline/10_balancing_timeline.py`** -- a pure reference diagram (no
+  data), mapping when each piece (day-ahead, Fahrplan, redispatch,
+  intraday trading, IP-Index, FCR/aFRR/mFRR, RZ-/NRV-Saldo, reBAP
+  publication tiers, billing) actually happens relative to one delivered
+  quarter-hour. Corrects two easy-to-assume-wrong orderings: redispatch is
+  not a single D-1-only planning step (it keeps updating in parallel with
+  intraday trading, up to real-time ad-hoc calls per TenneT's own
+  Redispatch 2.0 FAQ), and the IP-Index is computed *before* the
+  NRV-Saldo/reBAP for the same quarter-hour can even exist (IP-Index needs
+  only the last trades before T; NRV-Saldo needs real metered values
+  *after* T, then ~2 weeks to go "qualitätsgesichert").
+- **RZ-Saldo (the four per-TSO-zone balances NRV-Saldo is summed from) is
+  also downloadable** -- same LotesCharts mechanism, `ProduktId=34` /
+  `WebApiRoute=NrvSaldo/rzsaldo/qualitaetsgesichert` instead of NRV-Saldo's
+  `6`/`nrvsaldo`, starts 2014-04-30 (later than NRV-Saldo's 2014-01-01),
+  same gap-year profile. A one-week spot check (2024-01-08 to -14, not
+  yet fully downloaded) already shows a striking structural pattern:
+  TenneT's zone was negative (over-supplied) 93% of the quarter-hours that
+  week, while the other three zones were positive (under-supplied) most of
+  the time -- plausibly the north/south wind-vs-load split, not yet
+  investigated further. Sum of the four zones matches the already-
+  downloaded NRV-Saldo to float-rounding precision.
+- **SMARD's "realisierte Erzeugung" for wind/solar is not a clean "what
+  was physically fed in" number.** Directly-telemetered (larger) plants:
+  real actual output. The many small, non-telemetered plants: a regulated
+  "Online-Hochrechnung" that, since January 2015, is *legally required to
+  exclude* grid-driven curtailment (Einspeisemanagement/Redispatch) --
+  netztransparenz.de's own wording: "als theoretisch höchstmögliche
+  Erzeugungsleistung... zu interpretieren." Inherited from EEG
+  Einspeisemanagement-compensation methodology (operators are paid for
+  what they *would* have produced), not designed for market-transparency
+  purposes, but SMARD's public figures carry it through regardless --
+  likely a slight over-statement of true net feed-in whenever curtailment
+  is material. Also confirmed: SMARD's generation forecast (day-ahead
+  wind/solar) is not redispatch-adjusted and isn't a "Fahrplan" (it
+  predates both logically); SMARD does have an official load forecast
+  ("Prognostizierter Stromverbrauch") per its own user manual, but it's
+  not yet in this hub's migrated `edh/smard.py` Variable catalog -- a real
+  gap, not yet filled. No TSO publishes a forward-looking "expected
+  NRV-Saldo" -- the closest thing, the `AEP-Schätzer`, estimates the price
+  for a quarter-hour that has *already* ended (within 30 minutes), not a
+  predictive tool.
+
 ## Next Steps
 
 1. Decide whether the wind-speed-reconstruction result (round 2, above)
