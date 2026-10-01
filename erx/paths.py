@@ -144,6 +144,20 @@ class ProjPaths:
         return self.downloads_path / "kelmarsh_grid_meter_status.csv"
 
     # ------------------------------------------------------------------ #
+    # NRV-Saldo (Netzregelverbund-Saldo), netztransparenz.de               #
+    # Germany-wide aggregate imbalance (MW, quarter-hourly, qualitaets-    #
+    # gesichert): positive = system under-supplied, negative = over-      #
+    # supplied. Experiment, not yet promoted to energy-data-hub -- see     #
+    # `pipeline/08_download_nrv_saldo.py`.                                 #
+    # ------------------------------------------------------------------ #
+
+    @property
+    def nrv_saldo_file(self) -> Path:
+        """Germany-wide NRV-Saldo, quarter-hourly, naive UTC index, single
+        `nrv_saldo_mw` column. See `pipeline/08_download_nrv_saldo.py`."""
+        return self.downloads_path / "netztransparenz" / "nrv_saldo.parquet"
+
+    # ------------------------------------------------------------------ #
     # Helpers                                                              #
     # ------------------------------------------------------------------ #
 

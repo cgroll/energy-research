@@ -157,6 +157,53 @@ stages:
       - output/images/07_missing_observations.png:
           cache: false
 
+  download_nrv_saldo:
+    cmd: uv run python pipeline/08_download_nrv_saldo.py
+    deps:
+      - pipeline/08_download_nrv_saldo.py
+    outs:
+      - data/downloads/netztransparenz/nrv_saldo.parquet:
+          persist: true
+
+  nrv_saldo_vs_rebap:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/09_nrv_saldo_vs_rebap.ipynb
+      pipeline/09_nrv_saldo_vs_rebap.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/09_nrv_saldo_vs_rebap.ipynb
+    deps:
+      - pipeline/09_nrv_saldo_vs_rebap.py
+      - data/downloads/netztransparenz/nrv_saldo.parquet
+      - ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      - ../energy-data-hub/data/smard/price_de_lu.parquet
+    outs:
+      - book/notebooks/09_nrv_saldo_vs_rebap.ipynb:
+          cache: false
+      - output/images/09_week_overlay.png:
+          cache: false
+      - output/images/09_spread_vs_nrv_scatter.png:
+          cache: false
+      - output/images/09_quintile_bars.png:
+          cache: false
+
+  balancing_timeline:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/10_balancing_timeline.ipynb
+      pipeline/10_balancing_timeline.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/10_balancing_timeline.ipynb
+    deps:
+      - pipeline/10_balancing_timeline.py
+    outs:
+      - book/notebooks/10_balancing_timeline.ipynb:
+          cache: false
+      - output/images/10_balancing_timeline.png:
+          cache: false
+
   download_example:
     cmd: uv run python pipeline/01_download_example.py
     deps:

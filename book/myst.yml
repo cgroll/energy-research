@@ -26,6 +26,8 @@ project:
     - title: Balancing markets
       children:
         - file: notebooks/07_balancing_market_prices.ipynb
+        - file: notebooks/09_nrv_saldo_vs_rebap.ipynb
+        - file: notebooks/10_balancing_timeline.ipynb
 site:
   options:
     folders: true

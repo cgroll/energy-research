@@ -341,3 +341,75 @@ stages:
       hash: md5
       md5: a84e11305d09cda0f1ad3b932f2159ad
       size: 84198
+  download_nrv_saldo:
+    cmd: uv run python pipeline/08_download_nrv_saldo.py
+    deps:
+    - path: pipeline/08_download_nrv_saldo.py
+      hash: md5
+      md5: 90f1cb0748f27f14c4962dd5a532cac0
+      size: 6743
+    outs:
+    - path: data/downloads/netztransparenz/nrv_saldo.parquet
+      hash: md5
+      md5: 6134b50ce19f2f4b60db2ffe415b0614
+      size: 5349150
+  nrv_saldo_vs_rebap:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
+      python3 --output book/notebooks/09_nrv_saldo_vs_rebap.ipynb
+      pipeline/09_nrv_saldo_vs_rebap.py && uv run python
+      pipeline/_strip_jupytext_metadata.py
+      book/notebooks/09_nrv_saldo_vs_rebap.ipynb
+    deps:
+    - path: ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      hash: md5
+      md5: c75aa3d42d1180ae5c357591107ea003
+      size: 5331723
+    - path: ../energy-data-hub/data/smard/price_de_lu.parquet
+      hash: md5
+      md5: d07af934029f20afe657c5702f8ba26f
+      size: 804840
+    - path: data/downloads/netztransparenz/nrv_saldo.parquet
+      hash: md5
+      md5: 6134b50ce19f2f4b60db2ffe415b0614
+      size: 5349150
+    - path: pipeline/09_nrv_saldo_vs_rebap.py
+      hash: md5
+      md5: be22b0eb0940bf2d07f25c63e49e4c72
+      size: 8979
+    outs:
+    - path: book/notebooks/09_nrv_saldo_vs_rebap.ipynb
+      hash: md5
+      md5: d18ccfaaa0e6c4a8e6ac30a9b70d20b6
+      size: 14509
+    - path: output/images/09_quintile_bars.png
+      hash: md5
+      md5: bb3f28b09a16d4fe83c86316c07c8843
+      size: 53545
+    - path: output/images/09_spread_vs_nrv_scatter.png
+      hash: md5
+      md5: fbc79f364ebcfce2ef9ef19d47e49de2
+      size: 61651
+    - path: output/images/09_week_overlay.png
+      hash: md5
+      md5: 755e1cff5db8e9d17c2765b215fdd669
+      size: 142990
+  balancing_timeline:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
+      python3 --output book/notebooks/10_balancing_timeline.ipynb
+      pipeline/10_balancing_timeline.py && uv run python
+      pipeline/_strip_jupytext_metadata.py
+      book/notebooks/10_balancing_timeline.ipynb
+    deps:
+    - path: pipeline/10_balancing_timeline.py
+      hash: md5
+      md5: 4d0ea31208b901ef524fa14172c6a81b
+      size: 8680
+    outs:
+    - path: book/notebooks/10_balancing_timeline.ipynb
+      hash: md5
+      md5: 2a4c85a2a6736020a283debd5c294536
+      size: 11977
+    - path: output/images/10_balancing_timeline.png
+      hash: md5
+      md5: 583cd77565d263cb5f77a3ce8302369d
+      size: 220053
