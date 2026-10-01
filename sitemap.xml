@@ -22,4 +22,10 @@
   <url>
     <loc>http://localhost:3000/notebooks/balancing-market-prices</loc>
   </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/nrv-saldo-vs-rebap</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/balancing-timeline</loc>
+  </url>
 </urlset>
