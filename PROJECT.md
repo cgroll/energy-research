@@ -336,6 +336,46 @@ non-obvious findings, one of which became a new page:
   for a quarter-hour that has *already* ended (within 30 minutes), not a
   predictive tool.
 
+**2026-10-04 — New sub-topic: how negative day-ahead prices in Germany are
+evolving.** A different kind of question from everything else in this repo
+so far — not a validation-against-ground-truth exercise, just a first
+descriptive look at the hub's `smard_price_de_lu` (EPEX day-ahead auction,
+hourly, naive UTC, since 2018-09-30). Built as
+`pipeline/11_negative_day_ahead_prices.py`
+(`book/notebooks/11_...ipynb`), four views: hours/year (level + trend),
+hour-of-day/month-of-year seasonality pooled across years, a year x month
+heatmap to see whether the seasonal pattern itself is shifting, and the
+distribution of how many consecutive hours a negative-price spell lasts.
+- **Clear upward trend**, 2,530 negative hours total out of 69,984. Fit
+  on full calendar years only (2019-2025, to avoid the partial 2018/2026
+  edge years biasing a raw-count trend): negative-hour share rises
+  roughly +1.4 percentage points per year, from under 1% in 2019 to
+  several percent by 2024-2025; 2026 (partial, through September) is
+  already running at a similarly elevated share.
+- **Seasonality is unambiguously a solar-oversupply signature:** negative
+  hours concentrate in the late-morning-to-mid-afternoon window (UTC) and
+  in the spring-through-early-autumn months — not a wind- or
+  winter-driven pattern.
+- **The year x month heatmap adds something the pooled seasonality chart
+  can't show on its own:** the pattern isn't just intensifying within a
+  fixed window, it's widening. Early years (2019-2021) show a handful of
+  isolated bright months clustered around spring/summer; 2024-2026 show
+  most months of the year lit up, including some autumn/winter months
+  that were essentially zero before.
+- **Duration distribution, somewhat counter to a "scattered single-hour
+  blip" mental model:** a single isolated negative hour is one of the
+  *least* common episode lengths, not the typical case. 488 episodes
+  total, median length 5 hours, longest a 36-hour unbroken stretch. The
+  ~5% of episodes running past 10 hours in a row account for roughly a
+  sixth of all negative hours on their own — negative prices mostly
+  arrive as multi-hour midday/afternoon blocks.
+- Pure descriptive/exploratory, no promotion decision pending — unlike
+  the Kelmarsh or balancing-market sub-topics above, this one doesn't
+  depend on any new data (the hub's existing `price_de_lu` asset already
+  covers it fully) and isn't tied to a validation question, so there's no
+  obvious "next step" gate before it could go into `energy-insights` if
+  wanted.
+
 ## Next Steps
 
 1. Decide whether the wind-speed-reconstruction result (round 2, above)

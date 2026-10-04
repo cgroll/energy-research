@@ -28,6 +28,9 @@ project:
         - file: notebooks/07_balancing_market_prices.ipynb
         - file: notebooks/09_nrv_saldo_vs_rebap.ipynb
         - file: notebooks/10_balancing_timeline.ipynb
+    - title: Day-ahead market
+      children:
+        - file: notebooks/11_negative_day_ahead_prices.ipynb
 site:
   options:
     folders: true

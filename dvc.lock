@@ -413,3 +413,39 @@ stages:
       hash: md5
       md5: 583cd77565d263cb5f77a3ce8302369d
       size: 220053
+  negative_day_ahead_prices:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/11_negative_day_ahead_prices.ipynb 
+      pipeline/11_negative_day_ahead_prices.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/11_negative_day_ahead_prices.ipynb
+    deps:
+    - path: ../energy-data-hub/data/smard/price_de_lu.parquet
+      hash: md5
+      md5: d07af934029f20afe657c5702f8ba26f
+      size: 804840
+    - path: pipeline/11_negative_day_ahead_prices.py
+      hash: md5
+      md5: b694cdd3dce94df343999820dd1d6050
+      size: 12481
+    outs:
+    - path: book/notebooks/11_negative_day_ahead_prices.ipynb
+      hash: md5
+      md5: 662c8916d8d75c51a537a38c4703b026
+      size: 21632
+    - path: output/images/11_episode_duration.png
+      hash: md5
+      md5: 4f2553eb39f1ce1a08c6fa168a78922c
+      size: 71510
+    - path: output/images/11_hours_per_year.png
+      hash: md5
+      md5: 58bdf367bfb9c172c8adf2affcbf2e8c
+      size: 92114
+    - path: output/images/11_seasonality_hour_month.png
+      hash: md5
+      md5: 3709b7c8d746045e96de411b88135d00
+      size: 74428
+    - path: output/images/11_year_month_heatmap.png
+      hash: md5
+      md5: a7fa396799b2d0ce003eb8fc9921a683
+      size: 83157

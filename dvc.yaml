@@ -204,6 +204,29 @@ stages:
       - output/images/10_balancing_timeline.png:
           cache: false
 
+  negative_day_ahead_prices:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/11_negative_day_ahead_prices.ipynb
+      pipeline/11_negative_day_ahead_prices.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/11_negative_day_ahead_prices.ipynb
+    deps:
+      - pipeline/11_negative_day_ahead_prices.py
+      - ../energy-data-hub/data/smard/price_de_lu.parquet
+    outs:
+      - book/notebooks/11_negative_day_ahead_prices.ipynb:
+          cache: false
+      - output/images/11_hours_per_year.png:
+          cache: false
+      - output/images/11_seasonality_hour_month.png:
+          cache: false
+      - output/images/11_year_month_heatmap.png:
+          cache: false
+      - output/images/11_episode_duration.png:
+          cache: false
+
   download_example:
     cmd: uv run python pipeline/01_download_example.py
     deps:
