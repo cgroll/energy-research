@@ -13,10 +13,10 @@ stages:
       md5: 018f2298ceca482c45be800de9bb0c10
       size: 165268
   process_example:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output book/notebooks/02_analyse_example.ipynb
-      pipeline/02_analyse_example.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/02_analyse_example.ipynb 
+      pipeline/02_analyse_example.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/02_analyse_example.ipynb
     deps:
     - path: data/downloads/example_data.parquet
@@ -65,18 +65,18 @@ stages:
       md5: af3a038f0f7fddfc1608ad0bfc8cf5ba
       size: 807
   compare_kelmarsh_pecd:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output book/notebooks/02_compare_kelmarsh_pecd.ipynb
-      pipeline/02_compare_kelmarsh_pecd.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/02_compare_kelmarsh_pecd.ipynb 
+      pipeline/02_compare_kelmarsh_pecd.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/02_compare_kelmarsh_pecd.ipynb
     deps:
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
       hash: md5
       md5: 531f51a75a32ef73a78f6ad2d1264189
       size: 25711499
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
       hash: md5
       md5: a892560354d264daa65a57c49ddec382
@@ -115,18 +115,18 @@ stages:
       md5: 06bec5b48ee5c98db014dd9786b33416
       size: 47334908
   compare_windspeed_reconstruction:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output book/notebooks/04_compare_windspeed_reconstruction.ipynb
-      pipeline/04_compare_windspeed_reconstruction.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/04_compare_windspeed_reconstruction.ipynb 
+      pipeline/04_compare_windspeed_reconstruction.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/04_compare_windspeed_reconstruction.ipynb
     deps:
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
       hash: md5
       md5: 531f51a75a32ef73a78f6ad2d1264189
       size: 25711499
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
       hash: md5
       md5: a892560354d264daa65a57c49ddec382
@@ -157,18 +157,18 @@ stages:
       md5: e00cebce825c10aef982b8afa6ee0e19
       size: 597032
   pecd_de_capacity_factors_vs_constant_demand:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output
-      book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
-      pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py && uv run
-      python pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output 
+      book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb 
+      pipeline/05_pecd_de_capacity_factors_vs_constant_demand.py && uv run 
+      python pipeline/_strip_jupytext_metadata.py 
       book/notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
     deps:
     - path: ../energy-data-hub/data/capacity/capacity_by_region_year.parquet
       hash: md5
       md5: 737cf65035c1fa7bd0b5a32a21f0cc76
       size: 285259
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/pecd_country_capacity_factors_simple_de.parquet
       hash: md5
       md5: f5d731436bc741f48555859568751446
@@ -219,39 +219,39 @@ stages:
       md5: 95c6b9668758a666ab179bfa88c62e55
       size: 61861
   pecd_country_and_regional_capacity_factors:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output
-      book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output 
+      book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb 
       pipeline/06_pecd_country_and_regional_capacity_factors.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/06_pecd_country_and_regional_capacity_factors.ipynb
     deps:
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_1980-1989.parquet
       hash: md5
       md5: 3f5db9defc8c0882f0343bc7093055c4
       size: 25715788
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_1990-1999.parquet
       hash: md5
       md5: 8448f80b7052aa877f8bd42c91053093
       size: 25683563
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2000-2009.parquet
       hash: md5
       md5: d321b4669776b6dcdfb3f146079fb5d9
       size: 25664694
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
       hash: md5
       md5: 531f51a75a32ef73a78f6ad2d1264189
       size: 25711499
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
       hash: md5
       md5: a892560354d264daa65a57c49ddec382
       size: 17184408
-    - path:
+    - path: 
         ../energy-data-hub/data/pecd/pecd_country_capacity_factors_simple.parquet
       hash: md5
       md5: 4bb03bc019d3aab460aa72f70bbc2564
@@ -286,10 +286,10 @@ stages:
       md5: d16ebc52a0eded0bf88706d7bfaea521
       size: 115467
   balancing_market_prices:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output book/notebooks/07_balancing_market_prices.ipynb
-      pipeline/07_balancing_market_prices.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/07_balancing_market_prices.ipynb 
+      pipeline/07_balancing_market_prices.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/07_balancing_market_prices.ipynb
     deps:
     - path: ../energy-data-hub/data/balancing_market/afrr_capacity_price.parquet
@@ -306,13 +306,13 @@ stages:
       size: 5331723
     - path: pipeline/07_balancing_market_prices.py
       hash: md5
-      md5: 9e7fdade9b8667a6dbd065ed59bc4822
-      size: 17726
+      md5: 6b4b773a99fa7bed4d2957bb45d466c3
+      size: 19114
     outs:
     - path: book/notebooks/07_balancing_market_prices.ipynb
       hash: md5
-      md5: d224763ab18543abd2c25b28b5e3f95f
-      size: 28948
+      md5: c7508fa0233198783ed148cf93a4db3a
+      size: 31092
     - path: output/images/07_afrr_analysis.png
       hash: md5
       md5: 7a2a496491d00266a625c459994a9645
@@ -354,10 +354,10 @@ stages:
       md5: 6134b50ce19f2f4b60db2ffe415b0614
       size: 5349150
   nrv_saldo_vs_rebap:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output book/notebooks/09_nrv_saldo_vs_rebap.ipynb
-      pipeline/09_nrv_saldo_vs_rebap.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/09_nrv_saldo_vs_rebap.ipynb 
+      pipeline/09_nrv_saldo_vs_rebap.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/09_nrv_saldo_vs_rebap.ipynb
     deps:
     - path: ../energy-data-hub/data/balancing_market/rebap_price.parquet
@@ -374,13 +374,13 @@ stages:
       size: 5349150
     - path: pipeline/09_nrv_saldo_vs_rebap.py
       hash: md5
-      md5: be22b0eb0940bf2d07f25c63e49e4c72
-      size: 8979
+      md5: 23dba198f2b2c83a422b1d5ea2443028
+      size: 9575
     outs:
     - path: book/notebooks/09_nrv_saldo_vs_rebap.ipynb
       hash: md5
-      md5: d18ccfaaa0e6c4a8e6ac30a9b70d20b6
-      size: 14509
+      md5: 16e2b8ee0b1ceee34ed509986547ba66
+      size: 15428
     - path: output/images/09_quintile_bars.png
       hash: md5
       md5: bb3f28b09a16d4fe83c86316c07c8843
@@ -394,21 +394,21 @@ stages:
       md5: 755e1cff5db8e9d17c2765b215fdd669
       size: 142990
   balancing_timeline:
-    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel
-      python3 --output book/notebooks/10_balancing_timeline.ipynb
-      pipeline/10_balancing_timeline.py && uv run python
-      pipeline/_strip_jupytext_metadata.py
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/10_balancing_timeline.ipynb 
+      pipeline/10_balancing_timeline.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
       book/notebooks/10_balancing_timeline.ipynb
     deps:
     - path: pipeline/10_balancing_timeline.py
       hash: md5
-      md5: 4d0ea31208b901ef524fa14172c6a81b
-      size: 8680
+      md5: c451e962f83dc1b13c5332e0d3371cf0
+      size: 8973
     outs:
     - path: book/notebooks/10_balancing_timeline.ipynb
       hash: md5
-      md5: 2a4c85a2a6736020a283debd5c294536
-      size: 11977
+      md5: bab1290858197f8923a51eb7f226024e
+      size: 12388
     - path: output/images/10_balancing_timeline.png
       hash: md5
       md5: 583cd77565d263cb5f77a3ce8302369d

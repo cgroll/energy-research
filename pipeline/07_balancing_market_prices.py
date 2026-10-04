@@ -128,6 +128,12 @@ fig.savefig(paths.images_path / "07_rebap_timeseries.png", dpi=150, bbox_inches=
 plt.show()
 
 # %% [markdown]
+# ```{figure} ../../output/images/07_rebap_timeseries.png
+# :name: fig-07-rebap-timeseries
+# reBAP, monthly mean, full history since 2014.
+# ```
+
+# %% [markdown]
 # ### Block, seasonal, yearly, and weekday/weekend views
 
 # %%
@@ -172,6 +178,13 @@ fig.savefig(paths.images_path / "07_rebap_analysis.png", dpi=150, bbox_inches="t
 plt.show()
 
 # %% [markdown]
+# ```{figure} ../../output/images/07_rebap_analysis.png
+# :name: fig-07-rebap-analysis
+# reBAP by time-of-day block, calendar month, calendar year, and
+# weekday/weekend.
+# ```
+
+# %% [markdown]
 # ## FCR (Frequency Containment Reserve / Primärregelleistung)
 
 # %% [markdown]
@@ -190,6 +203,13 @@ ax.set_axisbelow(True)
 fig.tight_layout()
 fig.savefig(paths.images_path / "07_fcr_timeseries.png", dpi=150, bbox_inches="tight")
 plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/07_fcr_timeseries.png
+# :name: fig-07-fcr-timeseries
+# FCR capacity price, monthly mean across all 4h blocks, full history
+# since 2021.
+# ```
 
 # %% [markdown]
 # ### Block, seasonal, yearly, and weekday/weekend views
@@ -237,6 +257,12 @@ fig.savefig(paths.images_path / "07_fcr_analysis.png", dpi=150, bbox_inches="tig
 plt.show()
 
 # %% [markdown]
+# ```{figure} ../../output/images/07_fcr_analysis.png
+# :name: fig-07-fcr-analysis
+# FCR by 4h block, calendar month, calendar year, and weekday/weekend.
+# ```
+
+# %% [markdown]
 # ## aFRR (automatic Frequency Restoration Reserve / Sekundärregelleistung)
 #
 # Shown throughout as two series -- negative (downward) and positive
@@ -264,6 +290,13 @@ ax.legend(fontsize=9)
 fig.tight_layout()
 fig.savefig(paths.images_path / "07_afrr_timeseries.png", dpi=150, bbox_inches="tight")
 plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/07_afrr_timeseries.png
+# :name: fig-07-afrr-timeseries
+# aFRR negative (downward) vs. positive (upward) capacity price,
+# monthly mean across all 4h blocks, full history since 2018-10.
+# ```
 
 # %% [markdown]
 # ### Block, seasonal, yearly, and weekday/weekend views
@@ -336,6 +369,13 @@ fig.savefig(paths.images_path / "07_afrr_analysis.png", dpi=150, bbox_inches="ti
 plt.show()
 
 # %% [markdown]
+# ```{figure} ../../output/images/07_afrr_analysis.png
+# :name: fig-07-afrr-analysis
+# aFRR (negative vs. positive) by 4h block, calendar month, calendar
+# year, and weekday/weekend.
+# ```
+
+# %% [markdown]
 # ## How complete is each series? Missing observations by year
 #
 # Share of expected timestamps missing, per calendar year -- 15-min
@@ -384,6 +424,13 @@ ax.legend(fontsize=9)
 fig.tight_layout()
 fig.savefig(paths.images_path / "07_missing_observations.png", dpi=150, bbox_inches="tight")
 plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/07_missing_observations.png
+# :name: fig-07-missing-observations
+# Share of expected timestamps missing, per calendar year, for each of
+# the three series.
+# ```
 
 # %% [markdown]
 # reBAP and aFRR are 100% complete in every year. FCR has exactly one

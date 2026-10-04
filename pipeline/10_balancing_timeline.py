@@ -171,6 +171,14 @@ fig.savefig(paths.images_path / "10_balancing_timeline.png", dpi=160, bbox_inche
 plt.show()
 
 # %% [markdown]
+# ```{figure} ../../output/images/10_balancing_timeline.png
+# :name: fig-10-balancing-timeline
+# From day-ahead trading to final settlement: when each of market,
+# schedule, redispatch, control-reserve, and metering/billing events
+# happens relative to delivery time T.
+# ```
+
+# %% [markdown]
 # ## Reading the diagram, stage by stage
 #
 # 1. **D-1, 12:00** -- EPEX day-ahead auction gate closure.

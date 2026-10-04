@@ -116,6 +116,13 @@ fig.savefig(paths.images_path / "09_week_overlay.png", dpi=150, bbox_inches="tig
 plt.show()
 
 # %% [markdown]
+# ```{figure} ../../output/images/09_week_overlay.png
+# :name: fig-09-week-overlay
+# reBAP vs. day-ahead price (top) and NRV-Saldo (bottom), one sample
+# week in January 2024.
+# ```
+
+# %% [markdown]
 # Visually, the two panels track each other closely: every time the
 # orange NRV-Saldo panel swings positive (system short), reBAP (purple)
 # pulls away above the day-ahead line (blue); every time it swings
@@ -141,6 +148,13 @@ fig.colorbar(hb[3], ax=ax, label="Quarter-hours per cell")
 fig.tight_layout()
 fig.savefig(paths.images_path / "09_spread_vs_nrv_scatter.png", dpi=150, bbox_inches="tight")
 plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/09_spread_vs_nrv_scatter.png
+# :name: fig-09-spread-vs-nrv-scatter
+# Spread (reBAP - day-ahead) against NRV-Saldo, all clean-year
+# quarter-hours, shown as a 2D histogram.
+# ```
 
 # %% [markdown]
 # The point cloud tilts clearly from bottom-left (long system, negative
@@ -180,6 +194,12 @@ for xi, v in zip(x, quintile_stats["mean"]):
 fig.tight_layout()
 fig.savefig(paths.images_path / "09_quintile_bars.png", dpi=150, bbox_inches="tight")
 plt.show()
+
+# %% [markdown]
+# ```{figure} ../../output/images/09_quintile_bars.png
+# :name: fig-09-quintile-bars
+# Average spread (reBAP - day-ahead) by NRV-Saldo quintile.
+# ```
 
 # %% [markdown]
 # A clean, monotonic staircase from -70 EUR/MWh (most over-supplied
