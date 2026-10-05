@@ -463,6 +463,34 @@ sourced and published. Replicated it here as a first attempt.
   combined with a real historical residual-load series, predicts actual
   SMARD day-ahead prices on hours without strong renewable oversupply.
 
+**2026-10-05 — reBAP sub-topic chain fully promoted; prototypes removed.**
+The balancing-market/reBAP investigation chain (`09`, `14`, `16`, `17` --
+see the balancing-market reconstruction work above) is now fully reflected
+in `energy-insights`: the calculation-logic finding (`max`/`min` of three
+published AEP modules reconstructs real reBAP to 99.99% exact match) lives
+in `page_rebap_formula_reconstruction`, and the NRV-Saldo/intraday-price
+relationship (`reBAP - ID-AEP` same-sign agreement 93%->100% vs. NRV-Saldo,
+with a one-week time-series view) was rebuilt as a new page,
+`page_rebap_intraday_signal` (`pages/15_rebap_intraday_signal.py`).
+`09`/`14`/`16`/`17` and their notebooks/images removed from this repo
+accordingly -- explicit decision: keep only the calculation-logic finding
+and the NRV-Saldo/intraday-price relationship from this whole chain,
+nothing else (the SAMAWATT-chart reconstruction in `14` and the
+intermediate Module-2-only reconstruction in `17` were not carried
+forward). `10_balancing_timeline.py` (reference diagram) stays.
+
+Also removed in the same pass:
+- `11_negative_day_ahead_prices.py` (+ notebook + 4 images) -- a separate
+  topic, found to be a word-for-word structural duplicate of
+  `energy-insights`' `page_negative_day_ahead_prices` (same four section
+  headings, same four questions), nothing left depending on it here.
+- `07_balancing_market_prices.py` (+ notebook + 7 images) -- first look at
+  reBAP **and** FCR/aFRR together (boxplot/seasonality/trend/weekday/
+  completeness views for all three series). Not a duplicate -- no
+  insights page covers FCR/aFRR at all yet -- but removed anyway on an
+  explicit call: FCR/aFRR will get their own proper cleanup pass later,
+  this exploratory page isn't worth keeping around in the meantime.
+
 ## Next Steps
 
 1. Decide whether the wind-speed-reconstruction result (round 2, above)
