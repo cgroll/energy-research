@@ -30,11 +30,6 @@ stable platform now that it looks sound:
   (`page_kelmarsh_vs_pecd` asset), rebuilt against the hub's own outputs
   rather than re-reading this repo's copy.
 
-This repo's own `data/downloads/kelmarsh_grid_*` / `kelmarsh_wt_static.csv`
-files are now superseded by the hub's copy — kept here only as the
-original prototype/scratch record, not read by anything downstream
-anymore.
-
 **2026-09-29 — Kelmarsh sub-topic, round 2: does real wind speed beat
 PECD's weather input?** The hourly (not monthly) comparison in
 `02_compare_kelmarsh_pecd.py` stayed visibly noisy even after the
@@ -48,10 +43,27 @@ wind speed to power via `windpowerlib`'s real MM92/2050 power curve
 (`04_compare_windspeed_reconstruction.py`). Result, full 2016-2021 window,
 hourly: correlation **0.99** and NMAE **7.7%** (availability-adjusted),
 vs. PECD's 0.86 / 35.8% — see Lessons Learned. Confirms the hypothesis
-clearly. Not yet promoted into the hub/book — `windpowerlib` is a new
-dependency and the SCADA download is a much heavier pull (~1.5 GB vs.
-~1.5 MB for the grid meter), so this stays here pending a decision on
-whether it's worth that cost for the stable platform.
+clearly: with the right weather data for the right place and a real power
+curve, this farm's output is reconstructable almost perfectly — PECD only
+approximates it for lack of station-specific weather data.
+
+**Promoted the same day, 2026-09-29** (this note originally said "not yet
+promoted" — stale, fixed 2026-10-05): `windpowerlib` added as a hub/insights
+dependency, `kelmarsh_turbine_scada` added to `energy-data-hub`'s
+`kelmarsh` asset group, and the full wind-speed-reconstruction comparison
+merged directly into `energy-insights`' existing `pages/12_kelmarsh_vs_pecd.py`
+(not a separate page) alongside the PECD comparison from round 1. The two
+calibration side-checks that didn't change the conclusion (density-adjusted
+wind speed: no measurable difference once compared fairly; real per-turbine
+metered power as a model-free ceiling: ~4% NMAE from ordinary transformer/
+cabling loss) were dropped from that page 2026-10-05 to keep its message
+focused on the one finding that matters. Both Kelmarsh sub-topics' own
+prototype files (`01`/`02`/`03`/`04`, their downloaded data, notebooks, and
+images) have since been fully removed from this repo — fully superseded by
+the hub + insights versions, no remaining reason to keep a local copy
+(see `energy-research/AGENTS.md`'s research-repo-as-scratch-space
+convention, tightened 2026-10-05 to "remove once promoted and verified"
+rather than "keep as a scratch record").
 
 **2026-09-30 — New sub-topic: long-run PECD capacity factors vs a constant
 demand baseline.** A different angle from the Kelmarsh/ENTSO-E plant-level
@@ -376,6 +388,81 @@ distribution of how many consecutive hours a negative-price spell lasts.
   obvious "next step" gate before it could go into `energy-insights` if
   wanted.
 
+**2026-10-04 — New sub-topic: can a conventional-fleet merit order be
+built from scratch, cheaply?** Triggered by a conversation about the
+Lion Hirth curtailment paper (`literature/`) and whether we could build
+*synthetic* merit-order curves for hypothetical market states (more
+capacity, more batteries, different support schemes) — which first needed
+answering a narrower question: can today's real conventional-fleet merit
+order be reproduced at all from public data, without paying for EPEX's
+aggregated bid-curve data? Found the Energiewirtschaftliches Institut at
+Universität zu Köln (EWI)'s own "EWI Merit-Order Tool 2025" publishes its
+full methodology (fetched and read directly,
+`Dokumentation_EWI_Merit_Order_Tool_v2025.pdf`): marginal cost per plant
+block = (fuel price + transport cost) / efficiency + EUA price × emission
+factor / efficiency + other variable costs, available capacity = net
+capacity × (1 − outage share), fleet from MaStR, all assumption tables
+sourced and published. Replicated it here as a first attempt.
+
+- **`pipeline/12_download_conventional_mastr.py`** — the hub's `edh/mastr.py`
+  only harmonizes wind/solar/storage so far (combustion/nuclear were never
+  requested from open-mastr); pulling them turned up a real bug, not a
+  version issue: `open-mastr`'s own XML→SQL ingestion throws
+  `Failed to parse string: '2467 2473' as a scalar of type int64` on
+  `EinheitenVerbrennung.xml` and silently leaves that table empty —
+  reproduced identically on open-mastr 1.0.0 and 0.17.4 (the hub's pinned
+  version). Worked around by letting `Mastr().download()` fetch the raw
+  zip (that part succeeds) and then parsing `EinheitenVerbrennung.xml` /
+  `EinheitenKernkraft.xml` / `Katalogwerte.xml` directly with
+  `lxml.etree.iterparse` (streaming — combustion alone is ~285MB
+  uncompressed), picking only the handful of fields a merit order needs
+  rather than every column open-mastr tries to type-check. 94,222 raw
+  records in, 80,755 operational after filtering `EinheitBetriebsstatus ==
+  "In Betrieb"`, 77.6 GW net capacity — in the right ballpark for
+  Germany's current conventional fleet (hard coal ~15 GW, lignite ~15 GW,
+  gas ~34 GW, oil ~5 GW), first sanity check passed.
+- Confirmed MaStR net capacity is in kW throughout, same as the hub's
+  wind/solar convention (cross-checked against Grohnde nuclear's real 1360
+  MW, decommissioned but still on record).
+- `pipeline/13_merit_order_replication.py` — classifies each unit into
+  EWI's seven fuel categories (Kernenergie/Braunkohle/Steinkohle/Erdgas/
+  Öl/Sonstige/Abfall) via a many-to-one mapping from MaStR's much
+  finer-grained `main_fuel` free-text-like codes, further splits gas into
+  GuD/Gasturbine via MaStR's `Technologie` field (mirroring EWI's own
+  split) plus a third "Erdgas BHKW" bucket this notebook had to add
+  because most gas *units* are small decentral combustion engines/fuel
+  cells in neither EWI category. Aggregates everything under 10 MW into
+  one pseudo-block per category, same convention EWI's documentation
+  states for its own tool. Fuel/transport/variable-cost/outage/emission-
+  factor assumptions are EWI (2025)'s own published values, reused
+  directly, not re-sourced.
+- **Real gap, not just a simplification:** MaStR has no efficiency field
+  for *any* technology — confirmed both by this pull and by EWI's own
+  documentation, which says it carries forward a manually-curated,
+  block-level efficiency table from an older tool version rather than
+  reading one from MaStR. This notebook instead assigns one textbook
+  efficiency per fuel/technology class (e.g. CCGT 58%, lignite 38%, hard
+  coal 40%), which is why its boxplot-by-category shows zero within-
+  category spread — a visibly coarser result than EWI's own chart, worth
+  remembering as the one piece neither tool can get from the registry
+  itself.
+- **Resulting merit order lands in a plausible shape**, sorted ascending:
+  Abfall (~1 EUR/MWh, zero fuel/CO2 cost) → Braunkohle (~83) → Erdgas GuD
+  (~96) → Steinkohle (~99) → Erdgas BHKW (~138) → Erdgas Gasturbine (~157)
+  → Öl (~304) → Sonstige (~368) — including gas CCGT undercutting hard
+  coal at today's EUA price (69.35 EUR/tCO2), a real and well-documented
+  coal-to-gas switching effect, not a bug.
+- Promoted straight into the book (`book/myst.yml`'s "Merit order" section)
+  since it's a complete, self-contained finding — unlike the
+  validation-pending sub-topics elsewhere in this file, there's no
+  "promote to hub" decision pending yet because the clear next step (see
+  below) changes the shape of what would get promoted.
+- **Explicitly not yet built:** storage/batteries, cross-border flows,
+  the renewables-side curtailment-threshold layer from the Hirth paper,
+  and — the actual validation step — checking whether this merit order,
+  combined with a real historical residual-load series, predicts actual
+  SMARD day-ahead prices on hours without strong renewable oversupply.
+
 ## Next Steps
 
 1. Decide whether the wind-speed-reconstruction result (round 2, above)
@@ -413,6 +500,39 @@ distribution of how many consecutive hours a negative-price spell lasts.
 8. Only once this comparison looks sound: promote into `energy-data-hub`
    as a Dagster asset (new domain, e.g. `entsoe.py`) and into
    `energy-insights` as a page — same pattern as Kelmarsh above.
+9. **Merit-order replication (2026-10-04 sub-topic above) — backtest
+   against real prices.** Join the replicated conventional merit order
+   with a real historical residual-load series (hub's `smard` load +
+   wind/solar generation) and check whether the resulting
+   price-at-intersection prediction tracks actual `smard_price_de_lu` on
+   hours *without* strong renewable oversupply (the hours the merit order
+   is actually meant to explain) — this is the free alternative to paying
+   for EPEX's own aggregated day-ahead bid curves, discussed as the way to
+   validate a from-scratch merit order without that data.
+10. Add a renewables-side layer: the curtailment-threshold-per-cohort
+    logic from the Lion Hirth paper (`literature/`) — feed-in tariff vs.
+    market premium vs. merchant, per vintage/size class — so wind/solar
+    enter the merit order below zero where applicable instead of being
+    ignored entirely, as they are in the 2026-10-04 sub-topic above.
+11. Add a storage/battery layer — explicitly out of scope for both EWI's
+    own tool and this replication so far, but the main point of interest
+    for the synthetic/counterfactual market-state scenarios (more
+    capacity, more batteries, different support schemes) this whole
+    sub-topic was started to eventually support.
+12. Separately (same conversation, not yet started): look at Fraunhofer
+    ISE's published behind-the-meter PV self-consumption methodology
+    (MaStR + TSO data, 44 self-consumption groups by commissioning
+    date/power class/system type) as the next building block for a
+    synthetic merit order — covers the "we don't know behind-the-meter
+    usage" gap flagged earlier in that conversation.
+13. **Explicit promotion gate for the whole merit-order sub-topic**
+    (2026-10-04, user decision): keep iterating entirely within
+    `energy-research` — backtest (9), renewables layer (10), storage layer
+    (11), behind-the-meter (12) — until the result feels good and stable
+    end to end. Only then consider promoting any of it into
+    `energy-data-hub` (as new Dagster assets, e.g. a `conventional_mastr`
+    domain) and `energy-insights` (as a page), same promotion pattern as
+    Kelmarsh, deliberately not started early this time.
 
 ## Lessons Learned
 

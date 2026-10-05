@@ -13,6 +13,22 @@ idea is tried out first, using this template's lighter DVC/jupytext pipeline.
 A topic only gets promoted into the hub (as a Dagster asset) and into
 `energy-insights` (as a page) once it's been validated here.
 
+**Once a topic is fully promoted and verified against the hub/insights
+versions, remove its prototype from this repo** (pipeline scripts,
+downloaded data, notebooks, output images, and the corresponding
+`dvc.yaml`/`book/myst.yml` entries) — this repo is a scratch space for
+figuring out whether something works, not a permanent archive of
+superseded prototypes (tightened 2026-10-05; an earlier convention kept
+superseded files here "as the original prototype/scratch record" —
+superseded by this one). Before deleting, double check every piece
+actually made it across: a sub-topic sometimes has parts that were
+*not* promoted (e.g. an intermediate finding, or a side investigation
+that diverged from what the published page ended up covering) — only
+remove what's genuinely, fully duplicated. If another file here still
+depends on data a promoted download script produced, repoint it at
+`hub_file(...)` first rather than deleting the download script out from
+under it.
+
 A research topic may read data the hub has already ingested instead of
 re-downloading it — use `hub_file()` from `erx/paths.py`, which resolves an
 absolute path into the sibling `energy-data-hub` checkout and raises loudly
