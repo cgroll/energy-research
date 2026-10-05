@@ -20,12 +20,13 @@
 # should be a reasonable, if indirect, proxy for which way the system's
 # imbalance went in a given quarter-hour.
 #
-# `08_download_nrv_saldo.py` downloaded the actual, direct measure of
-# that: the **NRV-Saldo** (Netzregelverbund-Saldo) -- netztransparenz.de's
-# own aggregate imbalance figure for all of Germany, in MW, positive when
-# the system was under-supplied (short) and negative when over-supplied
-# (long). This notebook checks the spread-as-proxy story against the real
-# thing.
+# The actual, direct measure of that is the **NRV-Saldo** (Netzregelverbund-
+# Saldo) -- netztransparenz.de's own aggregate imbalance figure for all of
+# Germany, in MW, positive when the system was under-supplied (short) and
+# negative when over-supplied (long); promoted into `energy-data-hub` as
+# the `nrv_saldo` asset (`balancing_market` group) 2026-10-05, after this
+# notebook's own prototype download validated it. This notebook checks the
+# spread-as-proxy story against the real thing.
 #
 # **⚠️ NRV-Saldo has real, multi-month gaps in its history -- not a
 # download bug.** Checked year by year: 2014/2015 (~8.5% missing each),
@@ -59,11 +60,10 @@ EXCLUDED_YEARS = [2014, 2015, 2016, 2018, 2022]
 # %% [markdown]
 # ## Data
 #
-# reBAP (`energy-data-hub`'s `rebap_price` asset, 15-min) and the day-ahead
-# price (`smard_price_de_lu`, hourly -- forward-filled to 15-min, since the
-# day-ahead price genuinely applies uniformly across its whole hour, not
-# an average of it) joined against NRV-Saldo (this repo's own experimental
-# download, not yet in the hub), all on their shared 15-min grid.
+# reBAP, day-ahead, and NRV-Saldo -- all three `energy-data-hub` assets now
+# (`balancing_market`/`smard` groups) -- joined on their shared 15-min grid
+# (day-ahead is hourly, forward-filled to 15-min since the day-ahead price
+# genuinely applies uniformly across its whole hour, not an average of it).
 
 # %%
 rebap = pd.read_parquet(hub_file("balancing_market", "rebap_price.parquet"))
@@ -75,7 +75,7 @@ day_ahead_15min = day_ahead.reindex(
     pd.date_range(day_ahead.index.min(), day_ahead.index.max() + pd.Timedelta(minutes=45), freq="15min")
 ).ffill()
 
-nrv = pd.read_parquet(paths.nrv_saldo_file)
+nrv = pd.read_parquet(hub_file("balancing_market", "nrv_saldo.parquet"))
 
 panel = pd.DataFrame({
     "rebap": rebap["rebap_eur_mwh"],

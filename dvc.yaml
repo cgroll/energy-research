@@ -1,67 +1,29 @@
 stages:
-  download_kelmarsh:
-    cmd: uv run python pipeline/01_download_kelmarsh.py
+  download_conventional_mastr:
+    cmd: uv run python pipeline/12_download_conventional_mastr.py
     deps:
-      - pipeline/01_download_kelmarsh.py
+      - pipeline/12_download_conventional_mastr.py
     outs:
-      - data/downloads/kelmarsh_wt_static.csv:
-          persist: true
-      - data/downloads/kelmarsh_grid_3088.zip:
-          persist: true
-      - data/downloads/kelmarsh_grid_meter_data.csv:
-          persist: true
-      - data/downloads/kelmarsh_grid_meter_status.csv:
+      - data/downloads/mastr_conventional_units.parquet:
           persist: true
 
-  compare_kelmarsh_pecd:
+  merit_order_replication:
     cmd: >-
       MPLBACKEND=Agg uv run jupytext --to notebook --execute
       --set-kernel python3
-      --output book/notebooks/02_compare_kelmarsh_pecd.ipynb
-      pipeline/02_compare_kelmarsh_pecd.py &&
+      --output book/notebooks/13_merit_order_replication.ipynb
+      pipeline/13_merit_order_replication.py &&
       uv run python pipeline/_strip_jupytext_metadata.py
-      book/notebooks/02_compare_kelmarsh_pecd.ipynb
+      book/notebooks/13_merit_order_replication.ipynb
     deps:
-      - pipeline/02_compare_kelmarsh_pecd.py
-      - data/downloads/kelmarsh_grid_meter_data.csv
-      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
-      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
+      - pipeline/13_merit_order_replication.py
+      - data/downloads/mastr_conventional_units.parquet
     outs:
-      - book/notebooks/02_compare_kelmarsh_pecd.ipynb:
+      - book/notebooks/13_merit_order_replication.ipynb:
           cache: false
-      - output/images/02_kelmarsh_vs_pecd_mw_daily.png:
+      - output/images/13_merit_order_curve.png:
           cache: false
-      - output/images/02_kelmarsh_vs_pecd_mw_scatter.png:
-          cache: false
-
-  download_kelmarsh_scada:
-    cmd: uv run python pipeline/03_download_kelmarsh_scada.py
-    deps:
-      - pipeline/03_download_kelmarsh_scada.py
-    outs:
-      - data/downloads/kelmarsh_turbine_windspeed_power.parquet:
-          persist: true
-
-  compare_windspeed_reconstruction:
-    cmd: >-
-      MPLBACKEND=Agg uv run jupytext --to notebook --execute
-      --set-kernel python3
-      --output book/notebooks/04_compare_windspeed_reconstruction.ipynb
-      pipeline/04_compare_windspeed_reconstruction.py &&
-      uv run python pipeline/_strip_jupytext_metadata.py
-      book/notebooks/04_compare_windspeed_reconstruction.ipynb
-    deps:
-      - pipeline/04_compare_windspeed_reconstruction.py
-      - data/downloads/kelmarsh_turbine_windspeed_power.parquet
-      - data/downloads/kelmarsh_grid_meter_data.csv
-      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2010-2019.parquet
-      - ../energy-data-hub/data/pecd/capacity_factors_europe/pecd_wind_onshore_tech30_2020-2025.parquet
-    outs:
-      - book/notebooks/04_compare_windspeed_reconstruction.ipynb:
-          cache: false
-      - output/images/04_windspeed_reconstruction_daily.png:
-          cache: false
-      - output/images/04_windspeed_reconstruction_scatter.png:
+      - output/images/13_marginal_cost_boxplot.png:
           cache: false
 
   pecd_de_capacity_factors_vs_constant_demand:
@@ -157,14 +119,6 @@ stages:
       - output/images/07_missing_observations.png:
           cache: false
 
-  download_nrv_saldo:
-    cmd: uv run python pipeline/08_download_nrv_saldo.py
-    deps:
-      - pipeline/08_download_nrv_saldo.py
-    outs:
-      - data/downloads/netztransparenz/nrv_saldo.parquet:
-          persist: true
-
   nrv_saldo_vs_rebap:
     cmd: >-
       MPLBACKEND=Agg uv run jupytext --to notebook --execute
@@ -175,7 +129,7 @@ stages:
       book/notebooks/09_nrv_saldo_vs_rebap.ipynb
     deps:
       - pipeline/09_nrv_saldo_vs_rebap.py
-      - data/downloads/netztransparenz/nrv_saldo.parquet
+      - ../energy-data-hub/data/balancing_market/nrv_saldo.parquet
       - ../energy-data-hub/data/balancing_market/rebap_price.parquet
       - ../energy-data-hub/data/smard/price_de_lu.parquet
     outs:
@@ -186,6 +140,97 @@ stages:
       - output/images/09_spread_vs_nrv_scatter.png:
           cache: false
       - output/images/09_quintile_bars.png:
+          cache: false
+
+  imbalance_signal_days:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/14_imbalance_signal_days.ipynb
+      pipeline/14_imbalance_signal_days.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/14_imbalance_signal_days.ipynb
+    deps:
+      - pipeline/14_imbalance_signal_days.py
+      - ../energy-data-hub/data/balancing_market/nrv_saldo.parquet
+      - ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      - ../energy-data-hub/data/smard/price_de_lu.parquet
+    outs:
+      - book/notebooks/14_imbalance_signal_days.ipynb:
+          cache: false
+      - output/images/14_imbalance_signal_days.png:
+          cache: false
+
+  id_aep_vs_rebap_spread:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/16_id_aep_vs_rebap_spread.ipynb
+      pipeline/16_id_aep_vs_rebap_spread.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/16_id_aep_vs_rebap_spread.ipynb
+    deps:
+      - pipeline/16_id_aep_vs_rebap_spread.py
+      - ../energy-data-hub/data/balancing_market/nrv_saldo.parquet
+      - ../energy-data-hub/data/balancing_market/id_aep.parquet
+      - ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      - ../energy-data-hub/data/smard/price_de_lu.parquet
+    outs:
+      - book/notebooks/16_id_aep_vs_rebap_spread.ipynb:
+          cache: false
+      - output/images/16_rebap_vs_reference_price.png:
+          cache: false
+      - output/images/16_quintile_comparison.png:
+          cache: false
+      - output/images/16_spread_vs_saldo_timeseries.png:
+          cache: false
+
+  rebap_module2_reconstruction:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/17_rebap_module2_reconstruction.ipynb
+      pipeline/17_rebap_module2_reconstruction.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/17_rebap_module2_reconstruction.ipynb
+    deps:
+      - pipeline/17_rebap_module2_reconstruction.py
+      - ../energy-data-hub/data/balancing_market/nrv_saldo.parquet
+      - ../energy-data-hub/data/balancing_market/id_aep.parquet
+      - ../energy-data-hub/data/balancing_market/rebap_price.parquet
+    outs:
+      - book/notebooks/17_rebap_module2_reconstruction.ipynb:
+          cache: false
+      - output/images/17_module2_reconstruction.png:
+          cache: false
+
+  merit_order_steepness_vs_intraday_volatility:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/18_merit_order_steepness_vs_intraday_volatility.ipynb
+      pipeline/18_merit_order_steepness_vs_intraday_volatility.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/18_merit_order_steepness_vs_intraday_volatility.ipynb
+    deps:
+      - pipeline/18_merit_order_steepness_vs_intraday_volatility.py
+      - ../energy-data-hub/data/balancing_market/id_aep.parquet
+      - ../energy-data-hub/data/smard/load.parquet
+      - ../energy-data-hub/data/smard/generation_wind_onshore.parquet
+      - ../energy-data-hub/data/smard/generation_wind_offshore.parquet
+      - ../energy-data-hub/data/smard/generation_solar.parquet
+      - ../energy-data-hub/data/smard/forecast_onshore.parquet
+      - ../energy-data-hub/data/smard/forecast_offshore.parquet
+      - ../energy-data-hub/data/smard/forecast_solar.parquet
+      - ../energy-data-hub/data/smard/price_de_lu.parquet
+    outs:
+      - book/notebooks/18_merit_order_steepness_vs_intraday_volatility.ipynb:
+          cache: false
+      - output/images/18_revealed_merit_order.png:
+          cache: false
+      - output/images/18_merit_order_slope.png:
+          cache: false
+      - output/images/18_correction_vs_forecast_error_by_slope.png:
           cache: false
 
   balancing_timeline:

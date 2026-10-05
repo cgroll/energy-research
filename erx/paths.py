@@ -143,19 +143,27 @@ class ProjPaths:
         values."""
         return self.downloads_path / "kelmarsh_grid_meter_status.csv"
 
+    # NRV-Saldo, ID-AEP, and AEP Module 1/2/3 were prototyped here
+    # (pipeline/08, 15, 19) and promoted into `energy-data-hub`'s
+    # `balancing_market` asset group 2026-10-05 -- notebooks that still need
+    # them (09, 14, 16, 17, 18) now read them via `hub_file("balancing_market",
+    # ...)` instead of a path here, same convention as reBAP.
+
     # ------------------------------------------------------------------ #
-    # NRV-Saldo (Netzregelverbund-Saldo), netztransparenz.de               #
-    # Germany-wide aggregate imbalance (MW, quarter-hourly, qualitaets-    #
-    # gesichert): positive = system under-supplied, negative = over-      #
-    # supplied. Experiment, not yet promoted to energy-data-hub -- see     #
-    # `pipeline/08_download_nrv_saldo.py`.                                 #
+    # Conventional (combustion + nuclear) MaStR units -- EWI Merit-Order  #
+    # Tool replication. Self-parsed from the raw MaStR XML export rather  #
+    # than via open-mastr's own SQL ingestion -- see                      #
+    # `pipeline/12_download_conventional_mastr.py` module docstring.      #
     # ------------------------------------------------------------------ #
 
     @property
-    def nrv_saldo_file(self) -> Path:
-        """Germany-wide NRV-Saldo, quarter-hourly, naive UTC index, single
-        `nrv_saldo_mw` column. See `pipeline/08_download_nrv_saldo.py`."""
-        return self.downloads_path / "netztransparenz" / "nrv_saldo.parquet"
+    def mastr_conventional_units_file(self) -> Path:
+        """One row per combustion/nuclear MaStR unit: fuel/technology
+        codes + decoded labels, net/gross capacity (kW), commissioning +
+        shutdown dates, status, state. No efficiency column -- MaStR
+        doesn't have one for any technology, see
+        `pipeline/12_download_conventional_mastr.py`."""
+        return self.downloads_path / "mastr_conventional_units.parquet"
 
     # ------------------------------------------------------------------ #
     # Helpers                                                              #

@@ -351,8 +351,8 @@ stages:
     outs:
     - path: data/downloads/netztransparenz/nrv_saldo.parquet
       hash: md5
-      md5: 6134b50ce19f2f4b60db2ffe415b0614
-      size: 5349150
+      md5: e0105ec9f8cbb18d6990bf3287556bc9
+      size: 5353075
   nrv_saldo_vs_rebap:
     cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
       python3 --output book/notebooks/09_nrv_saldo_vs_rebap.ipynb 
@@ -360,6 +360,10 @@ stages:
       pipeline/_strip_jupytext_metadata.py 
       book/notebooks/09_nrv_saldo_vs_rebap.ipynb
     deps:
+    - path: ../energy-data-hub/data/balancing_market/nrv_saldo.parquet
+      hash: md5
+      md5: 3f13461911d2181cad340af2e11aeba1
+      size: 5352175
     - path: ../energy-data-hub/data/balancing_market/rebap_price.parquet
       hash: md5
       md5: c75aa3d42d1180ae5c357591107ea003
@@ -368,27 +372,23 @@ stages:
       hash: md5
       md5: d07af934029f20afe657c5702f8ba26f
       size: 804840
-    - path: data/downloads/netztransparenz/nrv_saldo.parquet
-      hash: md5
-      md5: 6134b50ce19f2f4b60db2ffe415b0614
-      size: 5349150
     - path: pipeline/09_nrv_saldo_vs_rebap.py
       hash: md5
-      md5: 23dba198f2b2c83a422b1d5ea2443028
-      size: 9575
+      md5: 3aa70f8c9b7f2bead53681d18a9e1af8
+      size: 9663
     outs:
     - path: book/notebooks/09_nrv_saldo_vs_rebap.ipynb
       hash: md5
-      md5: 16e2b8ee0b1ceee34ed509986547ba66
-      size: 15428
+      md5: 40e9a9fc3f8ecffcc2876fb7054e4c36
+      size: 15523
     - path: output/images/09_quintile_bars.png
       hash: md5
       md5: bb3f28b09a16d4fe83c86316c07c8843
       size: 53545
     - path: output/images/09_spread_vs_nrv_scatter.png
       hash: md5
-      md5: fbc79f364ebcfce2ef9ef19d47e49de2
-      size: 61651
+      md5: 1c70bafecdd25db2afe0e57360cfe9bd
+      size: 61692
     - path: output/images/09_week_overlay.png
       hash: md5
       md5: 755e1cff5db8e9d17c2765b215fdd669
@@ -449,3 +449,272 @@ stages:
       hash: md5
       md5: a7fa396799b2d0ce003eb8fc9921a683
       size: 83157
+  download_conventional_mastr:
+    cmd: uv run python pipeline/12_download_conventional_mastr.py
+    deps:
+    - path: pipeline/12_download_conventional_mastr.py
+      hash: md5
+      md5: 0b1634cae4004dee882dcd934fb5e9be
+      size: 9040
+    outs:
+    - path: data/downloads/mastr_conventional_units.parquet
+      hash: md5
+      md5: 9609ec4d803d927320205564c4418d28
+      size: 2551395
+  merit_order_replication:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/13_merit_order_replication.ipynb 
+      pipeline/13_merit_order_replication.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/13_merit_order_replication.ipynb
+    deps:
+    - path: data/downloads/mastr_conventional_units.parquet
+      hash: md5
+      md5: 9609ec4d803d927320205564c4418d28
+      size: 2551395
+    - path: pipeline/13_merit_order_replication.py
+      hash: md5
+      md5: 884b43233f250cf813d081e33a3a30af
+      size: 15080
+    outs:
+    - path: book/notebooks/13_merit_order_replication.ipynb
+      hash: md5
+      md5: d3ae3736f0f5c9626cd8189824242e9b
+      size: 34323
+    - path: output/images/13_marginal_cost_boxplot.png
+      hash: md5
+      md5: 96ba997585feff74b45670f187702691
+      size: 57892
+    - path: output/images/13_merit_order_curve.png
+      hash: md5
+      md5: d863e01e5935377239f3bfd85db8ffda
+      size: 68722
+  imbalance_signal_days:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/14_imbalance_signal_days.ipynb 
+      pipeline/14_imbalance_signal_days.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/14_imbalance_signal_days.ipynb
+    deps:
+    - path: ../energy-data-hub/data/balancing_market/nrv_saldo.parquet
+      hash: md5
+      md5: 3f13461911d2181cad340af2e11aeba1
+      size: 5352175
+    - path: ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      hash: md5
+      md5: c75aa3d42d1180ae5c357591107ea003
+      size: 5331723
+    - path: ../energy-data-hub/data/smard/price_de_lu.parquet
+      hash: md5
+      md5: d07af934029f20afe657c5702f8ba26f
+      size: 804840
+    - path: pipeline/14_imbalance_signal_days.py
+      hash: md5
+      md5: f5b0df039de1c6bbc3bc44e528809d39
+      size: 10977
+    outs:
+    - path: book/notebooks/14_imbalance_signal_days.ipynb
+      hash: md5
+      md5: f925c2bb09b0f981aa046e1e8d5b1af6
+      size: 15543
+    - path: output/images/14_imbalance_signal_days.png
+      hash: md5
+      md5: af28490e9a363085d182fa5afd77a77d
+      size: 127940
+  download_id_aep:
+    cmd: uv run python pipeline/15_download_id_aep.py
+    deps:
+    - path: pipeline/15_download_id_aep.py
+      hash: md5
+      md5: e7e79b50b3469de9f53ab478b55de1c1
+      size: 6847
+    outs:
+    - path: data/downloads/netztransparenz/id_aep.parquet
+      hash: md5
+      md5: 0dff8800ba8dded8d81918dfa73f50b1
+      size: 2259786
+  id_aep_vs_rebap_spread:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/16_id_aep_vs_rebap_spread.ipynb 
+      pipeline/16_id_aep_vs_rebap_spread.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/16_id_aep_vs_rebap_spread.ipynb
+    deps:
+    - path: ../energy-data-hub/data/balancing_market/id_aep.parquet
+      hash: md5
+      md5: dcd14dbd49faaed98e354efc0ee2c64e
+      size: 2260531
+    - path: ../energy-data-hub/data/balancing_market/nrv_saldo.parquet
+      hash: md5
+      md5: 3f13461911d2181cad340af2e11aeba1
+      size: 5352175
+    - path: ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      hash: md5
+      md5: c75aa3d42d1180ae5c357591107ea003
+      size: 5331723
+    - path: ../energy-data-hub/data/smard/price_de_lu.parquet
+      hash: md5
+      md5: d07af934029f20afe657c5702f8ba26f
+      size: 804840
+    - path: pipeline/16_id_aep_vs_rebap_spread.py
+      hash: md5
+      md5: b1b523546f1d7e0539b4f304b48857a1
+      size: 14191
+    outs:
+    - path: book/notebooks/16_id_aep_vs_rebap_spread.ipynb
+      hash: md5
+      md5: 54fd385f15b981c03350af04945dc16c
+      size: 21373
+    - path: output/images/16_quintile_comparison.png
+      hash: md5
+      md5: 1bf5273c4eccb98be3903cbb4d9b1e4a
+      size: 91005
+    - path: output/images/16_rebap_vs_reference_price.png
+      hash: md5
+      md5: bd43fc0e6a88230c001bdea8e7e94141
+      size: 101508
+    - path: output/images/16_spread_vs_saldo_timeseries.png
+      hash: md5
+      md5: fc50320fd1a32c3303b29e93ade3f228
+      size: 165359
+  rebap_module2_reconstruction:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/17_rebap_module2_reconstruction.ipynb 
+      pipeline/17_rebap_module2_reconstruction.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/17_rebap_module2_reconstruction.ipynb
+    deps:
+    - path: ../energy-data-hub/data/balancing_market/id_aep.parquet
+      hash: md5
+      md5: dcd14dbd49faaed98e354efc0ee2c64e
+      size: 2260531
+    - path: ../energy-data-hub/data/balancing_market/nrv_saldo.parquet
+      hash: md5
+      md5: 3f13461911d2181cad340af2e11aeba1
+      size: 5352175
+    - path: ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      hash: md5
+      md5: c75aa3d42d1180ae5c357591107ea003
+      size: 5331723
+    - path: pipeline/17_rebap_module2_reconstruction.py
+      hash: md5
+      md5: 7328b087244ab974d8960d45b495f67a
+      size: 9745
+    outs:
+    - path: book/notebooks/17_rebap_module2_reconstruction.ipynb
+      hash: md5
+      md5: 43f6f2f83eda41b4a9de5bc6fc8fc8f5
+      size: 16773
+    - path: output/images/17_module2_reconstruction.png
+      hash: md5
+      md5: a7d2b65895106f27af0d87dad692811f
+      size: 96669
+  merit_order_steepness_vs_intraday_volatility:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output 
+      book/notebooks/18_merit_order_steepness_vs_intraday_volatility.ipynb 
+      pipeline/18_merit_order_steepness_vs_intraday_volatility.py && uv run 
+      python pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/18_merit_order_steepness_vs_intraday_volatility.ipynb
+    deps:
+    - path: ../energy-data-hub/data/balancing_market/id_aep.parquet
+      hash: md5
+      md5: dcd14dbd49faaed98e354efc0ee2c64e
+      size: 2260531
+    - path: ../energy-data-hub/data/smard/forecast_offshore.parquet
+      hash: md5
+      md5: 88d219c32055d2435516a649bd00831c
+      size: 842784
+    - path: ../energy-data-hub/data/smard/forecast_onshore.parquet
+      hash: md5
+      md5: d82c41d86ba991eec87c74fe56e53273
+      size: 975355
+    - path: ../energy-data-hub/data/smard/forecast_solar.parquet
+      hash: md5
+      md5: b72cdea0c614bce0329d4e8d0df522c2
+      size: 817723
+    - path: ../energy-data-hub/data/smard/generation_solar.parquet
+      hash: md5
+      md5: 534ef76f2e13249a51099120ec723c03
+      size: 993887
+    - path: ../energy-data-hub/data/smard/generation_wind_offshore.parquet
+      hash: md5
+      md5: 99eedd855e451e274fd94b01e3dd6fe0
+      size: 870963
+    - path: ../energy-data-hub/data/smard/generation_wind_onshore.parquet
+      hash: md5
+      md5: 87d00cb57be24e4801b5c43ba759f6da
+      size: 1147085
+    - path: ../energy-data-hub/data/smard/load.parquet
+      hash: md5
+      md5: 37a5b5873e7732b9de7b5e6eeacd5f94
+      size: 1012396
+    - path: ../energy-data-hub/data/smard/price_de_lu.parquet
+      hash: md5
+      md5: d07af934029f20afe657c5702f8ba26f
+      size: 804840
+    - path: pipeline/18_merit_order_steepness_vs_intraday_volatility.py
+      hash: md5
+      md5: 04e057cc651156156f9e2949ae6950b3
+      size: 14948
+    outs:
+    - path: book/notebooks/18_merit_order_steepness_vs_intraday_volatility.ipynb
+      hash: md5
+      md5: eda40fb732b57888e92996163ee11525
+      size: 24229
+    - path: output/images/18_correction_vs_forecast_error_by_slope.png
+      hash: md5
+      md5: 7794fcd8f2ebe5d29174e0fd4153af1e
+      size: 118313
+    - path: output/images/18_merit_order_slope.png
+      hash: md5
+      md5: 39a037550c7dc3388c9396a59d8e5fd0
+      size: 258676
+    - path: output/images/18_revealed_merit_order.png
+      hash: md5
+      md5: a40a9edbaf52524be8fe98ef9ae44115
+      size: 243299
+  download_aep_modules:
+    cmd: uv run python pipeline/19_download_aep_modules.py
+    deps:
+    - path: pipeline/19_download_aep_modules.py
+      hash: md5
+      md5: 3efb2a8dad6e3ae4e09b505810799523
+      size: 6358
+    outs:
+    - path: data/downloads/netztransparenz/aep_modules.parquet
+      hash: md5
+      md5: 61bf3e446ee3fd1688e3dfde2937e149
+      size: 2181686
+  rebap_exact_reconstruction:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/20_rebap_exact_reconstruction.ipynb 
+      pipeline/20_rebap_exact_reconstruction.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/20_rebap_exact_reconstruction.ipynb
+    deps:
+    - path: ../energy-data-hub/data/balancing_market/rebap_price.parquet
+      hash: md5
+      md5: c75aa3d42d1180ae5c357591107ea003
+      size: 5331723
+    - path: data/downloads/netztransparenz/aep_modules.parquet
+      hash: md5
+      md5: 61bf3e446ee3fd1688e3dfde2937e149
+      size: 2181686
+    - path: data/downloads/netztransparenz/nrv_saldo.parquet
+      hash: md5
+      md5: e0105ec9f8cbb18d6990bf3287556bc9
+      size: 5353075
+    - path: pipeline/20_rebap_exact_reconstruction.py
+      hash: md5
+      md5: 4a2ae985da997c91b4b9f80a32eb5ed3
+      size: 10396
+    outs:
+    - path: book/notebooks/20_rebap_exact_reconstruction.ipynb
+      hash: md5
+      md5: ec5e04cdc76b0a62ead81206d7ea1b85
+      size: 18441
+    - path: output/images/20_rebap_exact_reconstruction.png
+      hash: md5
+      md5: da3c96cdeba5d82dd6a9c01176f9de8f
+      size: 91208

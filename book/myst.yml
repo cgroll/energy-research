@@ -15,10 +15,6 @@ project:
     - title: Analysis
       children:
         - file: notebooks/02_analyse_example.ipynb
-    - title: Kelmarsh (UK) wind validation
-      children:
-        - file: notebooks/02_compare_kelmarsh_pecd.ipynb
-        - file: notebooks/04_compare_windspeed_reconstruction.ipynb
     - title: PECD capacity factors
       children:
         - file: notebooks/05_pecd_de_capacity_factors_vs_constant_demand.ipynb
@@ -28,9 +24,16 @@ project:
         - file: notebooks/07_balancing_market_prices.ipynb
         - file: notebooks/09_nrv_saldo_vs_rebap.ipynb
         - file: notebooks/10_balancing_timeline.ipynb
+        - file: notebooks/14_imbalance_signal_days.ipynb
+        - file: notebooks/16_id_aep_vs_rebap_spread.ipynb
+        - file: notebooks/17_rebap_module2_reconstruction.ipynb
+        - file: notebooks/18_merit_order_steepness_vs_intraday_volatility.ipynb
     - title: Day-ahead market
       children:
         - file: notebooks/11_negative_day_ahead_prices.ipynb
+    - title: Merit order
+      children:
+        - file: notebooks/13_merit_order_replication.ipynb
 site:
   options:
     folders: true
