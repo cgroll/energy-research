@@ -8,12 +8,6 @@
     <loc>http://localhost:3000/notebooks/analyse-example</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/notebooks/compare-kelmarsh-pecd</loc>
-  </url>
-  <url>
-    <loc>http://localhost:3000/notebooks/compare-windspeed-reconstruction</loc>
-  </url>
-  <url>
     <loc>http://localhost:3000/notebooks/pecd-de-capacity-factors-vs-constant-demand</loc>
   </url>
   <url>
@@ -29,6 +23,21 @@
     <loc>http://localhost:3000/notebooks/balancing-timeline</loc>
   </url>
   <url>
+    <loc>http://localhost:3000/notebooks/imbalance-signal-days</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/id-aep-vs-rebap-spread</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/rebap-module2-reconstruction</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/merit-order-steepness-vs-intraday-volatility</loc>
+  </url>
+  <url>
     <loc>http://localhost:3000/notebooks/negative-day-ahead-prices</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/merit-order-replication</loc>
   </url>
 </urlset>
