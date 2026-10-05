@@ -14,28 +14,10 @@
     <loc>http://localhost:3000/notebooks/pecd-country-and-regional-capacity-factors</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/notebooks/balancing-market-prices</loc>
-  </url>
-  <url>
-    <loc>http://localhost:3000/notebooks/nrv-saldo-vs-rebap</loc>
-  </url>
-  <url>
     <loc>http://localhost:3000/notebooks/balancing-timeline</loc>
   </url>
   <url>
-    <loc>http://localhost:3000/notebooks/imbalance-signal-days</loc>
-  </url>
-  <url>
-    <loc>http://localhost:3000/notebooks/id-aep-vs-rebap-spread</loc>
-  </url>
-  <url>
-    <loc>http://localhost:3000/notebooks/rebap-module2-reconstruction</loc>
-  </url>
-  <url>
     <loc>http://localhost:3000/notebooks/merit-order-steepness-vs-intraday-volatility</loc>
-  </url>
-  <url>
-    <loc>http://localhost:3000/notebooks/negative-day-ahead-prices</loc>
   </url>
   <url>
     <loc>http://localhost:3000/notebooks/merit-order-replication</loc>
