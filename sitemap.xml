@@ -22,4 +22,10 @@
   <url>
     <loc>http://localhost:3000/notebooks/merit-order-replication</loc>
   </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/eeg-realized-generation-vs-smard</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/notebooks/eeg-veraeusserungsform-categories</loc>
+  </url>
 </urlset>
