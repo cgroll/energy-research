@@ -133,6 +133,61 @@ stages:
       - output/images/10_balancing_timeline.png:
           cache: false
 
+  download_eeg_bewegungsdaten:
+    cmd: uv run python pipeline/23_download_eeg_bewegungsdaten.py
+    deps:
+      - pipeline/23_download_eeg_bewegungsdaten.py
+    outs:
+      - data/downloads/eeg_bewegungsdaten_aggregated_2025.parquet:
+          persist: true
+
+  eeg_realized_generation_vs_smard:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/24_eeg_realized_generation_vs_smard.ipynb
+      pipeline/24_eeg_realized_generation_vs_smard.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/24_eeg_realized_generation_vs_smard.ipynb
+    deps:
+      - pipeline/24_eeg_realized_generation_vs_smard.py
+      - data/downloads/eeg_bewegungsdaten_aggregated_2025.parquet
+      - ../energy-data-hub/data/smard/generation_wind_onshore.parquet
+      - ../energy-data-hub/data/smard/generation_wind_offshore.parquet
+      - ../energy-data-hub/data/smard/generation_solar.parquet
+      - ../energy-data-hub/data/redispatch/smard_redispatch_by_source.parquet
+      - ../energy-data-hub/data/pecd/de_potential_historic.parquet
+    outs:
+      - book/notebooks/24_eeg_realized_generation_vs_smard.ipynb:
+          cache: false
+      - output/images/24_smard_vs_eeg_settlement.png:
+          cache: false
+
+  eeg_veraeusserungsform_categories:
+    cmd: >-
+      MPLBACKEND=Agg uv run jupytext --to notebook --execute
+      --set-kernel python3
+      --output book/notebooks/25_eeg_veraeusserungsform_categories.ipynb
+      pipeline/25_eeg_veraeusserungsform_categories.py &&
+      uv run python pipeline/_strip_jupytext_metadata.py
+      book/notebooks/25_eeg_veraeusserungsform_categories.ipynb
+    deps:
+      - pipeline/25_eeg_veraeusserungsform_categories.py
+      - data/downloads/eeg_bewegungsdaten_aggregated_2025.parquet
+      - data/downloads/eeg_bewegungsdaten
+      - ../energy-data-hub/data/smard/generation_wind_onshore.parquet
+      - ../energy-data-hub/data/smard/generation_wind_offshore.parquet
+      - ../energy-data-hub/data/smard/generation_solar.parquet
+      - ../energy-data-hub/data/redispatch/smard_redispatch_by_source.parquet
+    outs:
+      - book/notebooks/25_eeg_veraeusserungsform_categories.ipynb:
+          cache: false
+      - output/images/25_ausfallverguetung_vs_redispatch.png:
+          cache: false
+      - output/images/25_smard_vs_eeg_vs_redispatch.png:
+          cache: false
+
+
   download_example:
     cmd: uv run python pipeline/01_download_example.py
     deps:

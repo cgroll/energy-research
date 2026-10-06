@@ -23,9 +23,19 @@ project:
       children:
         - file: notebooks/10_balancing_timeline.ipynb
         - file: notebooks/18_merit_order_steepness_vs_intraday_volatility.ipynb
+    - title: Day-ahead vs. intraday
+      children:
+        - file: notebooks/19_day_ahead_vs_intraday_price_jumps.ipynb
+        - file: notebooks/20_jump_vs_forecast_error.ipynb
+        - file: notebooks/21_jump_vs_load_forecast_error.ipynb
+        - file: notebooks/22_cascading_price_decomposition.ipynb
     - title: Merit order
       children:
         - file: notebooks/13_merit_order_replication.ipynb
+    - title: SMARD vs. EEG settlement data
+      children:
+        - file: notebooks/24_eeg_realized_generation_vs_smard.ipynb
+        - file: notebooks/25_eeg_veraeusserungsform_categories.ipynb
 site:
   options:
     folders: true

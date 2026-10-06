@@ -166,6 +166,34 @@ class ProjPaths:
         return self.downloads_path / "mastr_conventional_units.parquet"
 
     # ------------------------------------------------------------------ #
+    # EEG-Jahresabrechnung "Bewegungsdaten" (netztransparenz.de) -- the   #
+    # four UENB's annual EEG settlement movement data, published with a  #
+    # ~9-month lag (2025's data released 2026-09-04). Unlike SMARD's     #
+    # near-real-time "Online-Hochrechnung" for small/non-telemetered     #
+    # plants, these quantities are the metered basis for actual EEG      #
+    # payments -- a real empirical check of whether SMARD's generation   #
+    # figures run before or after Einspeisemanagement/Redispatch         #
+    # curtailment. See `pipeline/23_download_eeg_bewegungsdaten.py`.     #
+    # ------------------------------------------------------------------ #
+
+    @property
+    def eeg_bewegungsdaten_raw_dir(self) -> Path:
+        """Working directory for the raw per-UENB zips + extracted CSVs
+        (Anlagenstammdaten + Bewegungsdaten), kept for debugging/re-runs
+        but not individually DVC-tracked -- only the aggregated parquet
+        below is."""
+        return self.downloads_path / "eeg_bewegungsdaten"
+
+    @property
+    def eeg_bewegungsdaten_aggregated_file(self) -> Path:
+        """Tidy aggregate: one row per (UENB, Energietraeger code,
+        Veraeusserungsform, Monat), summed `Strommenge` (kWh) + row count,
+        across all four UENBs' 2025 EEG annual settlement. Small (a few
+        thousand rows) -- the join/groupby over the ~10M raw rows happens
+        once in the download script via DuckDB."""
+        return self.downloads_path / "eeg_bewegungsdaten_aggregated_2025.parquet"
+
+    # ------------------------------------------------------------------ #
     # Helpers                                                              #
     # ------------------------------------------------------------------ #
 

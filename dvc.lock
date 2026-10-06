@@ -275,3 +275,110 @@ stages:
       hash: md5
       md5: a40a9edbaf52524be8fe98ef9ae44115
       size: 243299
+  download_eeg_bewegungsdaten:
+    cmd: uv run python pipeline/23_download_eeg_bewegungsdaten.py
+    deps:
+    - path: pipeline/23_download_eeg_bewegungsdaten.py
+      hash: md5
+      md5: 18948858d7d45a331b0c2a086f528fe7
+      size: 10540
+    outs:
+    - path: data/downloads/eeg_bewegungsdaten_aggregated_2025.parquet
+      hash: md5
+      md5: 48965c2c23cce3b2892dc055aa846e44
+      size: 18228
+  eeg_realized_generation_vs_smard:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/24_eeg_realized_generation_vs_smard.ipynb 
+      pipeline/24_eeg_realized_generation_vs_smard.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/24_eeg_realized_generation_vs_smard.ipynb
+    deps:
+    - path: ../energy-data-hub/data/pecd/de_potential_historic.parquet
+      hash: md5
+      md5: 353da0bca884e8d8f5404dc7a996f839
+      size: 3330968
+    - path: 
+        ../energy-data-hub/data/redispatch/smard_redispatch_by_source.parquet
+      hash: md5
+      md5: 88cd6886f6caee2fa4d61fce6931b7ba
+      size: 9013
+    - path: ../energy-data-hub/data/smard/generation_solar.parquet
+      hash: md5
+      md5: 534ef76f2e13249a51099120ec723c03
+      size: 993887
+    - path: ../energy-data-hub/data/smard/generation_wind_offshore.parquet
+      hash: md5
+      md5: 99eedd855e451e274fd94b01e3dd6fe0
+      size: 870963
+    - path: ../energy-data-hub/data/smard/generation_wind_onshore.parquet
+      hash: md5
+      md5: 87d00cb57be24e4801b5c43ba759f6da
+      size: 1147085
+    - path: data/downloads/eeg_bewegungsdaten_aggregated_2025.parquet
+      hash: md5
+      md5: 48965c2c23cce3b2892dc055aa846e44
+      size: 18228
+    - path: pipeline/24_eeg_realized_generation_vs_smard.py
+      hash: md5
+      md5: 3c4eb953bf0f099a58304eac1a00dd91
+      size: 18202
+    outs:
+    - path: book/notebooks/24_eeg_realized_generation_vs_smard.ipynb
+      hash: md5
+      md5: 8331e6fd9f6d904be040460ca13995d7
+      size: 28551
+    - path: output/images/24_smard_vs_eeg_settlement.png
+      hash: md5
+      md5: 5dafdb8b06c88dda8eb8de791949441d
+      size: 67580
+  eeg_veraeusserungsform_categories:
+    cmd: MPLBACKEND=Agg uv run jupytext --to notebook --execute --set-kernel 
+      python3 --output book/notebooks/25_eeg_veraeusserungsform_categories.ipynb
+      pipeline/25_eeg_veraeusserungsform_categories.py && uv run python 
+      pipeline/_strip_jupytext_metadata.py 
+      book/notebooks/25_eeg_veraeusserungsform_categories.ipynb
+    deps:
+    - path: 
+        ../energy-data-hub/data/redispatch/smard_redispatch_by_source.parquet
+      hash: md5
+      md5: 88cd6886f6caee2fa4d61fce6931b7ba
+      size: 9013
+    - path: ../energy-data-hub/data/smard/generation_solar.parquet
+      hash: md5
+      md5: 534ef76f2e13249a51099120ec723c03
+      size: 993887
+    - path: ../energy-data-hub/data/smard/generation_wind_offshore.parquet
+      hash: md5
+      md5: 99eedd855e451e274fd94b01e3dd6fe0
+      size: 870963
+    - path: ../energy-data-hub/data/smard/generation_wind_onshore.parquet
+      hash: md5
+      md5: 87d00cb57be24e4801b5c43ba759f6da
+      size: 1147085
+    - path: data/downloads/eeg_bewegungsdaten
+      hash: md5
+      md5: 86fc4827ac9636802465dfbdf4309647.dir
+      size: 2158148082
+      nfiles: 38
+    - path: data/downloads/eeg_bewegungsdaten_aggregated_2025.parquet
+      hash: md5
+      md5: 48965c2c23cce3b2892dc055aa846e44
+      size: 18228
+    - path: pipeline/25_eeg_veraeusserungsform_categories.py
+      hash: md5
+      md5: ce3ce76b3a735b500f59122334a70a82
+      size: 17149
+    outs:
+    - path: book/notebooks/25_eeg_veraeusserungsform_categories.ipynb
+      hash: md5
+      md5: af765aca0d9183b08044f9d19ba6f630
+      size: 28233
+    - path: output/images/25_ausfallverguetung_vs_redispatch.png
+      hash: md5
+      md5: d3c02b0abf91f7b40bf47b77c2ec48ef
+      size: 59956
+    - path: output/images/25_smard_vs_eeg_vs_redispatch.png
+      hash: md5
+      md5: 28775ef004669278d18fea88803124e5
+      size: 83808

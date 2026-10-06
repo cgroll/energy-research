@@ -491,6 +491,119 @@ Also removed in the same pass:
   explicit call: FCR/aFRR will get their own proper cleanup pass later,
   this exploratory page isn't worth keeping around in the meantime.
 
+**2026-10-06 — Empirical follow-up: is SMARD's wind/solar generation before or
+after Engpassmanagement?** The 2026-09-30 finding on this (SMARD's
+"realisierte Erzeugung" for non-telemetered plants is a regulated
+Online-Hochrechnung required since Jan 2015 to *exclude* curtailment) was
+purely textual, from netztransparenz.de's own documentation. User pointed
+at a real-numbers way to check it: the EEG annual settlement
+("Jahresabrechnung") movement data the four UENBs publish with a ~9-month
+lag (2025's data released 2026-09-04) -- the actual metered basis EEG
+compensation is paid on, not an estimate. Built `23_download_eeg_bewegungsdaten.py`
+(downloads + DuckDB-joins+aggregates all four UENBs' Bewegungsdaten +
+Anlagenstammdaten CSVs, ~10M raw rows -> ~1k-row parquet) and
+`24_eeg_realized_generation_vs_smard.py` (the comparison + chart, promoted
+straight to the book toc). Three independent 2025 numbers per technology:
+SMARD's reported generation; the EEG settlement's unambiguous
+actual-delivered quantity (`Veraeusserungsform` 1+2+3); and real curtailment
+from the hub's already-ingested `smard_redispatch_by_source` (SMARD's own
+official redispatch-by-source series -- the EEG settlement's own
+`Veraeusserungsform=4`/Ausfallverguetung turned out to capture only a tiny
+fraction of real curtailment, a few GWh/year nationally vs. the few-TWh/year
+everyone else reports, presumably because modern market-premium-route
+turbines' curtailment compensation isn't booked under that category).
+**Result, confirmed with real numbers, then stress-tested against an older,
+seemingly contradictory finding (user recalled correctly that
+`pecd-power-validity-DE` found *subtracting* redispatch from PECD-potential
+improved its match against SMARD -- which on its face reads as "SMARD is
+already net of curtailment", the opposite conclusion):** for all of onshore
+wind, offshore wind, and solar, SMARD's reported 2025 generation sits above
+the EEG settlement's clean, unambiguous actual-delivered quantity
+(`Veraeusserungsform` 1+2+3), and adding real curtailment (from the hub's own
+`smard_redispatch_by_source`, since the EEG settlement's own
+`Veraeusserungsform=4`/Ausfallverguetung captures only a tiny fraction of
+real curtailment) always *narrows* that gap, never overshoots it -- the one
+clean, assumption-light signal against SMARD being net-of-curtailment
+anywhere. But curtailment's own *share* of that gap is modest for two of the
+three: ~15% for onshore, ~18% for solar -- the other 80%+ is the EEG
+settlement's broader "Sonstiges" bucket (plausibly `ausgefoerdert`/merchant
+real generation `Einspeiseverguetung`'s own definition explicitly excludes,
+nothing to do with curtailment). Only once both are added does the
+reconciled total land within ~1% of SMARD for onshore/solar. **Offshore is
+the outlier in the other direction:** curtailment alone closes ~48% of its
+gap -- the largest share of any technology -- and its `Ausfallverguetung`
+settlement category is *exactly zero* across the whole dataset (offshore is
+~100% Marktpraemie/direct-marketed, never uses that FIT-era category),
+meaning its real curtailment compensation is very likely booked inside
+"Sonstiges" instead, so offshore's true curtailment-explained share is
+probably even higher than 48%. Checked this against `pecd-power-validity-DE`
+directly (pulled the hub's `pecd.de_potential_historic` for 2025 too):
+PECD's potential sits 6-22 TWh above SMARD, 2-8x the curtailment volume
+itself, so curtailment can only ever be a *minority* contributor to *that*
+gap -- matching its own published explained-shares (33% onshore, 71%
+offshore, 11% solar) and confirming the two findings don't actually
+conflict: PECD's potential carries independent upward bias (no outage
+modeling, no self-consumption modeling, weather-model error) large enough to
+swamp the curtailment-sized effect, so "subtracting redispatch improves the
+PECD match somewhat" doesn't actually prove SMARD nets curtailment out --
+that project's own README states "SMARD reports net generation" as an
+*assumed* premise in its processing diagram, never tested against ground
+truth before now. Where the two analyses do converge: offshore is the
+technology where curtailment explains the most of the gap in *both*.
+**Bottom line, more hedged than an earlier draft of this finding:** SMARD's
+generation series leans pre-curtailment/theoretical-max for all three
+technologies -- clearest for offshore wind, where curtailment is the
+dominant driver; for onshore/solar the same directional conclusion holds,
+but curtailment itself is a smaller, supporting factor next to broader
+settlement-coverage effects. Caveat noted in the notebook: EEG settlement
+only covers EEG-support-eligible plants, and "Sonstiges" mixes several
+real-quantity and financial-only line items that aren't separable here --
+the reconciliation holds up well in aggregate, not as a precise
+per-category audit.
+
+**2026-10-06 — Same-day follow-up: decomposed `Veraeusserungsform`, and
+revised the finding above for offshore.** Built
+`25_eeg_veraeusserungsform_categories.py`, re-reading the raw Bewegungsdaten
+(not just `23`'s aggregate) to settle two things `24` left unexplained:
+- `Veraeusserungsform=4` ("Ausfallverguetung") captures 0-5% of real
+  curtailment by technology (vs. SMARD's own redispatch numbers) and is
+  exactly 0% for offshore — confirmed it's a FIT-era line current
+  market-premium plants don't use.
+- "Sonstiges" (5, 41.6 TWh nationally) is **two unrelated things sharing
+  one code**: ~35 TWh of zero-EEG-payment merchant generation (plausibly
+  `ausgefoerdert` plants, sub-codes `SO-DV`/`SV`) plus a small-quantity
+  grab-bag of real payments (biomass flex premia, avoided grid fees,
+  corrections, ~470 Mio EUR). Also surfaced a sixth, undocumented bucket —
+  blank `Veraeusserungsform` in the raw export, 12.4 TWh / >1 Bn EUR
+  nationally — already silently included in `24`'s "all buckets" total via
+  a `pivot.get("<NA>", 0.0)` without being called out.
+- **Revises `24`'s own bottom line.** Comparing SMARD directly to the
+  *full* EEG total (all categories, not just the narrow 1+2+3 slice `24`'s
+  main test used) flips the offshore read: onshore/solar still sit close
+  to *full EEG total + real curtailment* (within ~1%, gross/pre-curtailment
+  reading holds), but **offshore's SMARD figure sits almost exactly on the
+  full EEG total alone — adding real curtailment on top overshoots it by
+  ~3.3 TWh (~13% above SMARD's own number)**. So offshore is the one
+  technology that looks net-of-curtailment, not gross — the opposite of
+  `24`'s "offshore is the clearest pre-curtailment case" framing (that
+  framing was about curtailment's *share of a gap measured against the
+  narrow slice*, not against the fuller real-generation benchmark).
+  Plausible reason: offshore is a handful of large, fully telemetered
+  parks (SMARD likely gets real already-curtailed meter values), while
+  onshore/solar are dominated by small, non-telemetered plants where SMARD
+  must use the curtailment-blind extrapolation from the original
+  2026-09-30 textual finding.
+- Cross-checked magnitudes against the open web: published 2024
+  Einspeisemanagement volumes (pv-magazine/cleanthinking, citing
+  TSO/Bundesnetzagentur data) — onshore ~3.38 TWh, offshore ~4.56 TWh,
+  solar ~1.39 TWh (+97% y/y) — are the same order of magnitude as this
+  notebook's 2025 figures (3.33/3.35/2.70 TWh), and the reported ~554 Mio
+  EUR total 2024 curtailment compensation lines up with the ~470 Mio EUR
+  found hiding in category 5 rather than category 4. Also noted: the much
+  larger ~30 TWh "total redispatch" headline (Bundesnetzagentur
+  Monitoringbericht) is dominated by conventional-plant redispatch, not
+  renewable curtailment — not the right benchmark here.
+
 ## Next Steps
 
 1. Decide whether the wind-speed-reconstruction result (round 2, above)
